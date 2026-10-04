@@ -399,4 +399,24 @@ canvas.addEventListener("mousedown",e=>{if(!selectingComponent||!source)return;s
 canvas.addEventListener("mousemove",e=>{if(!selectingComponent||!selectionStart)return;const p=canvasPoint(e);componentSelection={x:Math.min(selectionStart.x,p.x),y:Math.min(selectionStart.y,p.y),w:Math.abs(p.x-selectionStart.x),h:Math.abs(p.y-selectionStart.y)};draw()});
 canvas.addEventListener("mouseup",()=>{if(!selectingComponent||!componentSelection)return;selectionStart=null;if(componentSelection.w<4||componentSelection.h<4){componentSelection=null;updateStickerStatus("Area terlalu kecil. Pilih area komponen yang lebih besar.");draw();return}makeComponentSticker()});
 document.querySelector("#stickerFromComponent")!.addEventListener("click",()=>{if(!source){alert("Masukkan foto atau logo terlebih dahulu.");return}selectingComponent=true;componentSelection=null;selectionStart=null;updateStickerStatus("Mode pilih aktif: seret kotak di atas komponen yang ingin dijadikan stiker.");draw()});
+const toolsSidebar=document.querySelector<HTMLElement>("#toolsSidebar")!;
+const sidebarToggle=document.querySelector<HTMLButtonElement>("#sidebarToggle")!;
+const sidebarClose=document.querySelector<HTMLButtonElement>("#sidebarClose")!;
+const footerStatus=document.querySelector<HTMLElement>("#footerStatus");
+function setSidebar(open:boolean){
+ document.body.classList.toggle("sidebar-open",open);
+ localStorage.setItem("media-alat-sidebar",open?"1":"0");
+}
+const savedSidebar=localStorage.getItem("media-alat-sidebar");
+setSidebar(savedSidebar!=="0");
+sidebarToggle.addEventListener("click",()=>setSidebar(!document.body.classList.contains("sidebar-open")));
+sidebarClose.addEventListener("click",()=>setSidebar(false));
+document.addEventListener("keydown",e=>{
+ if(e.key==="Tab" && !e.ctrlKey && !e.altKey && !e.metaKey){e.preventDefault();setSidebar(!document.body.classList.contains("sidebar-open"))}
+ if(e.key==="Escape"){document.querySelectorAll<HTMLDetailsElement>(".side-menu[open]").forEach(x=>x.removeAttribute("open"))}
+});
+function setFooterStatus(message:string){if(footerStatus)footerStatus.textContent=message}
+document.querySelector("#cropTop")?.addEventListener("click",()=>setFooterStatus("Panel ukuran dibuka"));
+document.querySelector("#openSize")?.addEventListener("click",()=>setFooterStatus("Pilih ukuran kanvas"));
+document.querySelector("#download")?.addEventListener("click",()=>setFooterStatus("Ekspor gambar dimulai"));
 workspace.addEventListener("dragover",e=>e.preventDefault());workspace.addEventListener("drop",e=>{e.preventDefault();const f=(e as DragEvent).dataTransfer?.files[0];if(f)load(f)});

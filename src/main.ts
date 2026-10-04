@@ -88,7 +88,6 @@ app.innerHTML=`
     <button class="top-btn primary" id="open">Buka Foto</button>
     <button class="top-btn" id="cropTop">Pilih Ukuran</button>
     <button class="top-btn" id="save" disabled>Simpan</button><button class="top-btn" id="logout">Keluar</button>
-    <button class="top-btn" id="logout">Keluar</button>
     <button class="top-btn primary" id="download" disabled>Unduh</button>
   </div>
 </header>
@@ -145,23 +144,7 @@ app.innerHTML=`
       <button class="secondary" id="removeAsset">Hapus elemen</button>
     </div>
   </details>
-  <details class="tool-dropdown">
-    <summary>Gambar</summary>
-    <div class="dropdown-panel paint-panel">
-      <div class="paint-modes">
-        <button class="paint-choice active" id="brushTool">Kuas</button>
-        <button class="paint-choice" id="eraserTool">Hapus</button>
-        <button class="paint-choice" id="lineTool">Garis</button>
-        <button class="paint-choice" id="rectTool">Kotak</button>
-        <button class="paint-choice" id="circleTool">Lingkaran</button>
-      </div>
-      <label>Warna<input id="brushColor" type="color" value="#ef452e"></label>
-      <label>Ukuran kuas<input id="brushSize" type="range" min="1" max="80" value="8"></label>
-      <label>Opasitas<input id="brushOpacity" type="range" min="10" max="100" value="100"></label>
-      <button class="secondary" id="clearPaint">Hapus semua coretan</button>
-    </div>
-  </details>
-  <details class="tool-dropdown"><summary>Gambar</summary><div class="dropdown-panel paint-panel"><div class="paint-modes"><button class="paint-choice active" id="brushTool">Kuas</button><button class="paint-choice" id="eraserTool">Hapus</button><button class="paint-choice" id="lineTool">Garis</button><button class="paint-choice" id="rectTool">Kotak</button><button class="paint-choice" id="circleTool">Lingkaran</button></div><label>Warna<input id="brushColor" type="color" value="#ef452e"></label><label>Ukuran kuas<input id="brushSize" type="range" min="1" max="80" value="8"></label><label>Opasitas<input id="brushOpacity" type="range" min="10" max="100" value="100"></label><button class="secondary" id="clearPaint">Hapus semua coretan</button></div></details>  <details class="tool-dropdown export-dropdown">
+  <details class="tool-dropdown"><summary>Gambar</summary><div class="dropdown-panel paint-panel"><button class="secondary" id="brushTool">Kuas</button><button class="secondary" id="eraserTool">Penghapus</button><button class="secondary" id="clearPaint">Hapus coretan</button><label>Warna<input id="brushColor" type="color" value="#ef452e"></label><label>Ukuran<input id="brushSize" type="range" min="1" max="80" value="8"></label></div></details>  <details class="tool-dropdown export-dropdown">
     <summary>Ekspor</summary>
     <div class="dropdown-panel">
       <label>Format<select id="format"><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option></select></label>
@@ -199,7 +182,7 @@ let filter:FilterState={brightness:100,contrast:100,saturation:100,gray:0};
 let selectedProfile:Profile|null=null,customSize:{w:number;h:number}|null=null;
 let assets:{src:string;x:number;y:number;width:number;height:number;rotation:number}[]=[];
 let componentSelection:{x:number;y:number;w:number;h:number}|null=null;
-let selectingComponent=false;let paintLayer:HTMLCanvasElement|null=null,paintCtx:CanvasRenderingContext2D|null=null;let paintMode="brush";let painting=false;let paintStart={x:0,y:0};
+let selectingComponent=false;let painting=false;let paintCtx:CanvasRenderingContext2D|null=null;let paintMode="brush";let lastPaint={x:0,y:0};
 let texts:{text:string;x:number;y:number;size:number}[]=[];
 const platforms=[...new Set(profiles.map(p=>p.platform))];
 const SUPABASE_URL="https://rjoncaudkgsszhzgmwcx.supabase.co";
@@ -223,10 +206,7 @@ function setupLogin(){
   else{error.textContent="Password salah. Coba lagi.";input.select()}
  });
 }
-setupLogin();
-document.querySelector("#logout")?.addEventListener("click",()=>{localStorage.removeItem(AUTH_KEY);document.querySelector<HTMLElement>("#loginScreen")!.hidden=false});
-document.querySelector("#logout")?.addEventListener("click",()=>{localStorage.removeItem(AUTH_KEY);document.querySelector<HTMLElement>("#loginScreen")!.hidden=false;document.querySelector<HTMLInputElement>("#loginPassword")?.focus()});
-
+setupLogin();document.querySelector("#logout")?.addEventListener("click",()=>{localStorage.removeItem(AUTH_KEY);document.querySelector<HTMLElement>("#loginScreen")!.hidden=false});document.querySelector("#brushTool")?.addEventListener("click",()=>paintMode="brush");document.querySelector("#eraserTool")?.addEventListener("click",()=>paintMode="eraser");document.querySelector("#clearPaint")?.addEventListener("click",()=>{ctx.clearRect(0,0,canvas.width,canvas.height);draw()});
 const togglePassword=document.querySelector<HTMLButtonElement>("#togglePassword");
 const passwordInput=document.querySelector<HTMLInputElement>("#loginPassword");
 togglePassword?.addEventListener("click",()=>{
@@ -289,16 +269,9 @@ function canvasPoint(e:MouseEvent){const rect=canvas.getBoundingClientRect();ret
 function updateStickerStatus(message:string){const el=document.querySelector("#stickerStatus");if(el)el.textContent=message}
 function drawSelectionOverlay(){if(!componentSelection)return;ctx.save();ctx.strokeStyle="#8b3dff";ctx.lineWidth=Math.max(2,canvas.width/500);ctx.setLineDash([8,6]);ctx.strokeRect(componentSelection.x,componentSelection.y,componentSelection.w,componentSelection.h);ctx.fillStyle="#8b3dff22";ctx.fillRect(componentSelection.x,componentSelection.y,componentSelection.w,componentSelection.h);ctx.restore()}
 function makeComponentSticker(){if(!source||!componentSelection)return;const s=componentSelection;const temp=document.createElement("canvas");temp.width=Math.max(1,Math.round(s.w));temp.height=Math.max(1,Math.round(s.h));const tc=temp.getContext("2d")!;tc.drawImage(canvas,s.x,s.y,s.w,s.h,0,0,temp.width,temp.height);const src=temp.toDataURL("image/png");const img=new Image();img.onload=()=>{const max=Math.min(canvas.width,canvas.height)*.32;const scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));assets.push({src,x:canvas.width/2,y:canvas.height/2,width:img.naturalWidth*scale,height:img.naturalHeight*scale,rotation:0});componentSelection=null;selectingComponent=false;updateStickerStatus("Komponen berhasil dibuat menjadi stiker gambar.");draw()};img.src=src}
-function ensurePaintLayer(){if(!paintLayer)paintLayer=document.createElement("canvas");if(paintLayer.width!==canvas.width||paintLayer.height!==canvas.height){paintLayer.width=canvas.width;paintLayer.height=canvas.height}paintCtx=paintLayer.getContext("2d")!;paintCtx.lineCap="round";paintCtx.lineJoin="round"}
-function ppos(e:PointerEvent){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height}}
-function pstyle(){const c=paintCtx!;c.globalAlpha=Number((document.querySelector("#brushOpacity") as HTMLInputElement)?.value||100)/100;c.strokeStyle=(document.querySelector("#brushColor") as HTMLInputElement)?.value||"#ef452e";c.lineWidth=Number((document.querySelector("#brushSize") as HTMLInputElement)?.value||8)}
-function setupPaint(){canvas.style.touchAction="none";canvas.addEventListener("pointerdown",e=>{if(!source)return;ensurePaintLayer();painting=true;paintStart=ppos(e);canvas.setPointerCapture(e.pointerId)});canvas.addEventListener("pointermove",e=>{if(!painting)return;const p=ppos(e),c=paintCtx!;c.save();pstyle();c.globalCompositeOperation=paintMode==="eraser"?"destination-out":"source-over";if(paintMode==="brush"||paintMode==="eraser"){c.beginPath();c.moveTo(paintStart.x,paintStart.y);c.lineTo(p.x,p.y);c.stroke();paintStart=p}c.restore();draw()});canvas.addEventListener("pointerup",e=>{if(!painting)return;painting=false;const p=ppos(e),c=paintCtx!;if(paintMode==="line"||paintMode==="rect"||paintMode==="circle"){c.save();pstyle();c.beginPath();if(paintMode==="line"){c.moveTo(paintStart.x,paintStart.y);c.lineTo(p.x,p.y)}else if(paintMode==="rect"){c.rect(paintStart.x,paintStart.y,p.x-paintStart.x,p.y-paintStart.y)}else{const rx=(p.x-paintStart.x)/2,ry=(p.y-paintStart.y)/2;c.ellipse(paintStart.x+rx,p.y-ry,Math.abs(rx),Math.abs(ry),0,0,Math.PI*2)}c.stroke();c.restore()}draw();scheduleDraft()})}
+function paintPos(e:PointerEvent){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height}}
+function setupPaint(){canvas.addEventListener("pointerdown",e=>{if(!source)return;paintCtx=ctx;painting=true;lastPaint=paintPos(e);canvas.setPointerCapture(e.pointerId)});canvas.addEventListener("pointermove",e=>{if(!painting)return;const p=paintPos(e);paintCtx!.save();paintCtx!.strokeStyle=(document.querySelector("#brushColor") as HTMLInputElement).value;paintCtx!.lineWidth=Number((document.querySelector("#brushSize") as HTMLInputElement).value);paintCtx!.lineCap="round";paintCtx!.globalCompositeOperation=paintMode==="eraser"?"destination-out":"source-over";paintCtx!.beginPath();paintCtx!.moveTo(lastPaint.x,lastPaint.y);paintCtx!.lineTo(p.x,p.y);paintCtx!.stroke();paintCtx!.restore();lastPaint=p});canvas.addEventListener("pointerup",()=>{painting=false;scheduleDraft()})}
 setupPaint();
-const paintChoices:{id:string;mode:string}[]=[["brushTool","brush"],["eraserTool","eraser"],["lineTool","line"],["rectTool","rect"],["circleTool","circle"]];
-for(const [id,mode] of paintChoices)document.querySelector("#"+id)?.addEventListener("click",()=>{paintMode=mode;document.querySelectorAll(".paint-choice").forEach(x=>x.classList.remove("active"));document.querySelector("#"+id)?.classList.add("active")});
-document.querySelector("#clearPaint")?.addEventListener("click",()=>{if(paintCtx&&paintLayer){paintCtx.clearRect(0,0,paintLayer.width,paintLayer.height);draw();scheduleDraft()}});
-
-
 function draw(){
  if(!source)return;
  const out=cropDimensions(),cw=out.w,ch=out.h;canvas.width=cw;canvas.height=ch;ctx.clearRect(0,0,cw,ch);
@@ -308,9 +281,7 @@ function draw(){
  const scale=Math.max(cw/(sw?ih:iw),ch/(sw?iw:ih));ctx.drawImage(source,-iw*scale/2,-ih*scale/2,iw*scale,ih*scale);ctx.restore();ctx.filter="none";
  for(const a of assets){const img=new Image();img.onload=()=>{ctx.save();ctx.translate(a.x,a.y);ctx.rotate(a.rotation*Math.PI/180);ctx.drawImage(img,-a.width/2,-a.height/2,a.width,a.height);ctx.restore()};img.src=a.src}
  for(const t of texts){ctx.font="bold "+t.size+"px Arial";ctx.textAlign="left";ctx.textBaseline="middle";ctx.lineWidth=Math.max(4,t.size*.08);ctx.strokeStyle="#000";ctx.fillStyle="#fff";ctx.strokeText(t.text,t.x,t.y);ctx.fillText(t.text,t.x,t.y)}
- if(paintLayer&&paintLayer.width===canvas.width&&paintLayer.height===canvas.height)ctx.drawImage(paintLayer,0,0);
 }
-
 function load(file:File){
  if(!file.type.startsWith("image/"))return;
  const reader=new FileReader();

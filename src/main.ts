@@ -200,7 +200,6 @@ let selectedProfile:Profile|null=null,customSize:{w:number;h:number}|null=null;
 let assets:{src:string;x:number;y:number;width:number;height:number;rotation:number}[]=[];
 let componentSelection:{x:number;y:number;w:number;h:number}|null=null;
 let selectingComponent=false;let paintLayer:HTMLCanvasElement|null=null,paintCtx:CanvasRenderingContext2D|null=null;let paintMode="brush";let painting=false;let paintStart={x:0,y:0};
-let paintLayer:HTMLCanvasElement|null=null,paintCtx:CanvasRenderingContext2D|null=null;let paintMode="brush";let painting=false;let paintStart={x:0,y:0};
 let texts:{text:string;x:number;y:number;size:number}[]=[];
 const platforms=[...new Set(profiles.map(p=>p.platform))];
 const SUPABASE_URL="https://rjoncaudkgsszhzgmwcx.supabase.co";
@@ -224,15 +223,9 @@ function setupLogin(){
   else{error.textContent="Password salah. Coba lagi.";input.select()}
  });
 }
-setupLogin()setupLogin();
+setupLogin();
 document.querySelector("#logout")?.addEventListener("click",()=>{localStorage.removeItem(AUTH_KEY);document.querySelector<HTMLElement>("#loginScreen")!.hidden=false});
-const paintChoices=[["brushTool","brush"],["eraserTool","eraser"],["lineTool","line"],["rectTool","rect"],["circleTool","circle"]];
-paintChoices.forEach(([id,mode])=>document.querySelector("#"+id)?.addEventListener("click",()=>{paintMode=mode;document.querySelectorAll(".paint-choice").forEach(x=>x.classList.remove("active"));document.querySelector("#"+id)?.classList.add("active")}));
-document.querySelector("#clearPaint")?.addEventListener("click",()=>{paintCtx?.clearRect(0,0,canvas.width,canvas.height);draw();scheduleDraft()});
 document.querySelector("#logout")?.addEventListener("click",()=>{localStorage.removeItem(AUTH_KEY);document.querySelector<HTMLElement>("#loginScreen")!.hidden=false;document.querySelector<HTMLInputElement>("#loginPassword")?.focus()});
-const paintChoices:{id:string;mode:string}[]=[["brushTool","brush"],["eraserTool","eraser"],["lineTool","line"],["rectTool","rect"],["circleTool","circle"]];
-for(const [id,mode] of paintChoices)document.querySelector("#"+id)?.addEventListener("click",()=>{paintMode=mode;document.querySelectorAll(".paint-choice").forEach(x=>x.classList.remove("active"));document.querySelector("#"+id)?.classList.add("active")});
-document.querySelector("#clearPaint")?.addEventListener("click",()=>{if(paintCtx&&paintLayer){paintCtx.clearRect(0,0,paintLayer.width,paintLayer.height);draw();scheduleDraft()}});
 
 const togglePassword=document.querySelector<HTMLButtonElement>("#togglePassword");
 const passwordInput=document.querySelector<HTMLInputElement>("#loginPassword");

@@ -83,43 +83,51 @@ app.innerHTML=`
   <div class="comic-footer" aria-hidden="true"><span>MEDIA ALAT</span><b>STUDIO DIGITAL</b><span>NO. 001</span></div>
 </div>
 <header>
-  <div class="brand">MEDIA<span>ALAT</span><small>EDITOR FOTO</small></div>
+  <div class="brand"><span class="brand-mark">M</span><div>MEDIA<span>ALAT</span><small>EDITOR FOTO</small></div></div>
   <div class="top-actions">
-    <button class="top-btn primary" id="open">Buka Foto</button>
-    <button class="top-btn" id="cropTop">✂ Crop / Ukuran</button>
-    <button class="top-btn" id="save" disabled>Simpan</button><button class="top-btn" id="logout">Keluar</button>
-    <button class="top-btn primary" id="download" disabled>Unduh</button>
+    <button class="top-btn" id="sidebarToggle" type="button" aria-label="Buka atau tutup panel alat">☰ Alat</button>
+    <button class="top-btn primary" id="open">＋ Buka Foto</button>
+    <button class="top-btn" id="save" disabled>▣ Simpan</button>
+    <button class="top-btn primary" id="download" disabled>↓ Unduh</button>
+    <button class="top-btn" id="logout">Keluar</button>
   </div>
 </header>
-<nav class="toolbar" aria-label="Alat editor">
-  <div class="tool-group">
-    <span class="toolbar-title">Kanvas</span>
-    <button class="tool-pill" id="openSize">Ukuran</button>
-    <span class="size-readout" id="sizeReadout">Ukuran asli</span>
+<aside class="tools-sidebar" id="toolsSidebar" aria-label="Panel alat editor">
+  <div class="sidebar-head">
+    <div><strong>ALAT EDITOR</strong><small>Pilih alat yang ingin dipakai</small></div>
+    <button class="sidebar-close" id="sidebarClose" type="button" aria-label="Tutup panel alat">×</button>
   </div>
-  <div class="tool-group">
-    <span class="toolbar-title">Posisi</span>
-    <div class="arrow-pad">
-      <button class="arrow-btn" id="up" title="Geser ke atas" aria-label="Geser ke atas">↑</button>
-      <button class="arrow-btn" id="leftMove" title="Geser ke kiri" aria-label="Geser ke kiri">←</button>
-      <button class="arrow-btn center" id="centerMove" title="Kembalikan ke tengah" aria-label="Kembalikan ke tengah">•</button>
-      <button class="arrow-btn" id="rightMove" title="Geser ke kanan" aria-label="Geser ke kanan">→</button>
-      <button class="arrow-btn" id="down" title="Geser ke bawah" aria-label="Geser ke bawah">↓</button>
+
+  <section class="side-section">
+    <div class="side-label">KANVAS</div>
+    <div class="side-grid two">
+      <button class="side-tool featured" id="cropTop"><span>✂</span><b>Crop / Ukuran</b><small>Rasio & ukuran</small></button>
+      <button class="side-tool" id="openSize"><span>▣</span><b>Ukuran</b><small>Platform & custom</small></button>
+      <button class="side-tool" id="originalSize"><span>1:1</span><b>Asli</b><small>Ukuran foto asli</small></button>
+      <div class="side-readout" id="sizeReadout">Ukuran asli</div>
     </div>
-  </div>
-  <div class="tool-group compact">
-    <span class="toolbar-title">Putar</span>
-    <button class="icon-btn" id="left" title="Putar kiri" aria-label="Putar kiri">↶</button>
-    <button class="icon-btn" id="right" title="Putar kanan" aria-label="Putar kanan">↷</button>
-  </div>
-  <div class="tool-group compact">
-    <span class="toolbar-title">Balik</span>
-    <button class="icon-btn" id="flipX" title="Balik horizontal" aria-label="Balik horizontal">↔</button>
-    <button class="icon-btn" id="flipY" title="Balik vertikal" aria-label="Balik vertikal">↕</button>
-  </div>
-  <details class="tool-dropdown">
-    <summary>Filter</summary>
-    <div class="dropdown-panel filter-panel">
+  </section>
+
+  <section class="side-section">
+    <div class="side-label">POSISI & TRANSFORMASI</div>
+    <div class="position-box">
+      <button class="side-icon" id="up" title="Geser ke atas">↑</button>
+      <button class="side-icon" id="leftMove" title="Geser ke kiri">←</button>
+      <button class="side-icon center" id="centerMove" title="Kembalikan ke tengah">•</button>
+      <button class="side-icon" id="rightMove" title="Geser ke kanan">→</button>
+      <button class="side-icon" id="down" title="Geser ke bawah">↓</button>
+    </div>
+    <div class="side-grid two compact-grid">
+      <button class="side-tool" id="left"><span>↶</span><b>Putar kiri</b></button>
+      <button class="side-tool" id="right"><span>↷</span><b>Putar kanan</b></button>
+      <button class="side-tool" id="flipX"><span>↔</span><b>Balik X</b></button>
+      <button class="side-tool" id="flipY"><span>↕</span><b>Balik Y</b></button>
+    </div>
+  </section>
+
+  <details class="side-menu">
+    <summary><span class="menu-icon">◐</span><div><b>Filter & Warna</b><small>Atur tampilan foto</small></div><i>›</i></summary>
+    <div class="side-panel">
       <label>Kecerahan<input id="brightness" type="range" min="0" max="200" value="100"></label>
       <label>Kontras<input id="contrast" type="range" min="0" max="200" value="100"></label>
       <label>Saturasi<input id="saturation" type="range" min="0" max="200" value="100"></label>
@@ -127,32 +135,64 @@ app.innerHTML=`
       <button class="secondary" id="reset">Reset filter</button>
     </div>
   </details>
-  <details class="tool-dropdown">
-    <summary>Stiker</summary>
-    <div class="dropdown-panel sticker-panel">
-      <p class="section-note">Ambil bagian dari foto/logo lalu jadikan stiker gambar.</p>
+
+  <details class="side-menu">
+    <summary><span class="menu-icon">◇</span><div><b>Stiker</b><small>Ambil komponen atau gambar</small></div><i>›</i></summary>
+    <div class="side-panel">
+      <p class="section-note">Ambil bagian foto/logo lalu jadikan stiker.</p>
       <button class="secondary" id="stickerFromComponent">Ambil komponen</button>
       <button class="secondary" id="stickerUpload">Tambah gambar</button>
       <div class="sticker-status" id="stickerStatus">Belum ada komponen.</div>
     </div>
   </details>
-  <details class="tool-dropdown">
-    <summary>Elemen</summary>
-    <div class="dropdown-panel">
+
+  <details class="side-menu">
+    <summary><span class="menu-icon">T</span><div><b>Elemen</b><small>Teks, logo, hapus</small></div><i>›</i></summary>
+    <div class="side-panel">
       <button class="secondary" id="text">Tambah teks</button>
-      <button class="secondary" id="logo">Tambah logo</button>
-      <button class="secondary" id="removeAsset">Hapus elemen</button>
+      <button class="secondary" id="logo">Tambah logo / gambar</button>
+      <button class="secondary" id="removeAsset">Hapus elemen terakhir</button>
     </div>
   </details>
-  <details class="tool-dropdown"><summary>Gambar</summary><div class="dropdown-panel paint-panel"><button class="secondary" id="brushTool">Kuas</button><button class="secondary" id="eraserTool">Penghapus</button><button class="secondary" id="clearPaint">Hapus coretan</button><label>Warna<input id="brushColor" type="color" value="#ef452e"></label><label>Ukuran<input id="brushSize" type="range" min="1" max="80" value="8"></label></div></details>  <details class="tool-dropdown export-dropdown">
-    <summary>Ekspor</summary>
-    <div class="dropdown-panel">
+
+  <details class="side-menu">
+    <summary><span class="menu-icon">✎</span><div><b>Gambar</b><small>Kuas & penghapus</small></div><i>›</i></summary>
+    <div class="side-panel">
+      <div class="paint-actions"><button class="secondary" id="brushTool">Kuas</button><button class="secondary" id="eraserTool">Penghapus</button></div>
+      <button class="secondary" id="clearPaint">Hapus coretan</button>
+      <label>Warna<input id="brushColor" type="color" value="#ef452e"></label>
+      <label>Ukuran kuas<input id="brushSize" type="range" min="1" max="80" value="8"></label>
+    </div>
+  </details>
+
+  <details class="side-menu">
+    <summary><span class="menu-icon">↓</span><div><b>Ekspor</b><small>Format & kualitas</small></div><i>›</i></summary>
+    <div class="side-panel">
       <label>Format<select id="format"><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option></select></label>
       <label>Kualitas<input id="quality" type="range" min="50" max="100" value="92"></label>
     </div>
   </details>
-  <button class="tool-pill" id="originalSize">Asli</button>
-</nav>
+
+  <div class="sidebar-tip"><strong>Tip</strong><span>Panel ini bisa ditutup agar area kanvas lebih luas.</span></div>
+</aside>
+<main>
+  <section class="workspace" id="workspace">
+    <div class="canvas-stage">
+      <div class="empty" id="empty">
+        <div class="drop-icon">＋</div>
+        <h2>Masukkan foto untuk mulai</h2>
+        <p>Seret foto ke area ini atau pilih foto.</p>
+        <button class="choose-btn" id="choose">Pilih Foto</button>
+      </div>
+      <div class="canvas-wrap" id="canvasWrap" hidden><canvas id="canvas"></canvas></div>
+    </div>
+    <div class="workspace-hint">Seret foto ke sini • Panel alat di kiri • Klik ☰ Alat untuk membuka atau menutup</div>
+  </section>
+</main>
+<footer class="editor-footer">
+  <div class="footer-status"><span class="status-dot"></span><b>MEDIA ALAT STUDIO</b><span id="footerStatus">Siap bekerja</span></div>
+  <div class="footer-shortcuts"><span>Crop</span><kbd>C</kbd><span>Alat</span><kbd>Tab</kbd><span>Esc</span><span>tutup panel</span></div>
+</footer>
 <main>
   <section class="workspace" id="workspace">
     <div class="canvas-stage">

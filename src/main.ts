@@ -42,6 +42,7 @@ const profiles:Profile[]=[
 
 const app=document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML=`
+<div class="login-screen" id="loginScreen"><div class="login-card"><div class="login-mark">MEDIA<span>ALAT</span></div><div class="login-kicker">EDITOR FOTO</div><h1>Selamat datang</h1><p>Masukkan password untuk membuka ruang kerja Media Alat.</p><form id="loginForm"><label>Password<input id="loginPassword" type="password" autocomplete="current-password" placeholder="Masukkan password"></label><button type="submit" class="login-submit">Masuk</button><div class="login-error" id="loginError"></div></form></div></div>
 <header>
   <div class="brand">MEDIA<span>ALAT</span><small>EDITOR FOTO</small></div>
   <div class="top-actions">

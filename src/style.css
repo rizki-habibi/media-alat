@@ -271,3 +271,8 @@ body.sidebar-open.right-open .workspace{margin-left:318px;margin-right:278px}
 .dock-size span{font-size:8px;color:#858590}.dock-size input{width:95px;accent-color:#9a62ff}.dock-size b{font:800 9px monospace;color:#ddd;width:18px}
 @media(max-width:1000px){.tools-right{width:250px}.bottom-dock{min-width:600px}.dock-size{display:none}body.sidebar-open.right-open .workspace{margin-right:250px}}
 @media(max-width:760px){.tools-right{width:min(86vw,300px);bottom:64px}.bottom-dock{min-width:calc(100vw - 20px);bottom:39px;height:56px}.dock-group{gap:3px}.dock-tool,.dock-more{width:43px;height:42px}.dock-color{gap:3px}.swatch{width:20px;height:20px}.bottom-dock .dock-divider:last-of-type{display:none}body.sidebar-open.right-open .workspace{margin-left:0;margin-right:0}}
+
+/* ===== CANVAS PAN / CURSOR ===== */
+#canvas{cursor:crosshair;touch-action:none;}
+#canvas.pan-ready{cursor:grab;}
+#canvas.panning{cursor:grabbing!important;}

@@ -35,7 +35,8 @@ app.innerHTML=`
 
 const canvas=document.querySelector<HTMLCanvasElement>("#canvas")!,ctx=canvas.getContext("2d")!;
 const fileInput=document.querySelector<HTMLInputElement>("#file")!;
-let source:HTMLImageElement|null=null,rotation=0,flipX=1,flipY=1,filter={brightness:100,contrast:100,saturation:100,gray:0};
+type FilterState={brightness:number;contrast:number;saturation:number;gray:number};
+let source:HTMLImageElement|null=null,rotation=0,flipX=1,flipY=1,filter:FilterState={brightness:100,contrast:100,saturation:100,gray:0};
 let textItems:{text:string,x:number,y:number,size:number}[]=[];
 
 function draw(){
@@ -58,7 +59,7 @@ document.querySelector("#left")!.addEventListener("click",()=>{rotation=(rotatio
 document.querySelector("#right")!.addEventListener("click",()=>{rotation=(rotation+90)%360;draw()});
 document.querySelector("#flipX")!.addEventListener("click",()=>{flipX*=-1;draw()});
 document.querySelector("#flipY")!.addEventListener("click",()=>{flipY*=-1;draw()});
-for(const id of ["brightness","contrast","saturation","gray"])document.querySelector<HTMLInputElement>("#"+id)!.oninput=e=>{filter={...filter,[id]:Number((e.target as HTMLInputElement).value)};draw()};
+for(const id of ["brightness","contrast","saturation","gray"] as const)document.querySelector<HTMLInputElement>("#"+id)!.oninput=e=>{filter={...filter,[id]:Number((e.target as HTMLInputElement).value)};draw()};
 document.querySelector("#reset")!.addEventListener("click",()=>{filter={brightness:100,contrast:100,saturation:100,gray:0};for(const [k,v] of Object.entries(filter))document.querySelector<HTMLInputElement>("#"+k)!.value=String(v);draw()});
 document.querySelector("#preset")!.addEventListener("change",e=>{const v=(e.target as HTMLSelectElement).value;if(v){const [w,h]=v.split("x");document.querySelector<HTMLInputElement>("#width")!.value=w;document.querySelector<HTMLInputElement>("#height")!.value=h}});
 document.querySelector("#applySize")!.addEventListener("click",()=>{const w=Number(document.querySelector<HTMLInputElement>("#width")!.value),h=Number(document.querySelector<HTMLInputElement>("#height")!.value);if(!source||!w||!h)return;const tmp=document.createElement("canvas");tmp.width=w;tmp.height=h;const t=tmp.getContext("2d")!;t.drawImage(canvas,0,0,w,h);const img=new Image();img.onload=()=>{source=img;rotation=0;flipX=flipY=1;draw()};img.src=tmp.toDataURL("image/png")});

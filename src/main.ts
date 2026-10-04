@@ -175,6 +175,30 @@ app.innerHTML=`
 
   <div class="sidebar-tip"><strong>Tip</strong><span>Panel ini bisa ditutup agar area kanvas lebih luas.</span></div>
 </aside>
+<aside class="tools-right" id="toolsRight" aria-label="Panel properti">
+  <div class="right-head"><div><strong>PROPERTI</strong><small>Ruang kerja aktif</small></div><button id="rightToggle" type="button" aria-label="Tutup panel kanan">×</button></div>
+  <section class="right-card">
+    <div class="right-title">DOKUMEN</div>
+    <div class="doc-info"><span>Kanvas</span><b id="rightCanvasSize">—</b></div>
+    <div class="doc-info"><span>Elemen</span><b id="rightElementCount">0</b></div>
+    <div class="doc-info"><span>Status</span><b class="live">SIAP</b></div>
+  </section>
+  <section class="right-card">
+    <div class="right-title">LAPISAN</div>
+    <div class="layer-list" id="layerList"><div class="layer-empty">Belum ada elemen tambahan.</div></div>
+  </section>
+  <section class="right-card">
+    <div class="right-title">WARNA AKTIF</div>
+    <div class="color-preview-row"><div id="colorPreview" class="color-preview"></div><div><b id="colorHex">#EF452E</b><small>Warna kuas</small></div></div>
+    <input id="rightColor" class="big-color" type="color" value="#ef452e" aria-label="Pilih warna kuas">
+  </section>
+  <section class="right-card">
+    <div class="right-title">KONTROL</div>
+    <button class="right-action" id="rightBrush">Kuas aktif</button>
+    <button class="right-action" id="rightEraser">Penghapus</button>
+    <button class="right-action danger" id="rightClear">Bersihkan coretan</button>
+  </section>
+</aside>
 <main>
   <section class="workspace" id="workspace">
     <div class="canvas-stage">
@@ -189,6 +213,28 @@ app.innerHTML=`
     <div class="workspace-hint">Seret foto ke sini • Panel alat di kiri • Klik ☰ Alat untuk membuka atau menutup</div>
   </section>
 </main>
+<div class="bottom-dock" id="bottomDock">
+  <div class="dock-group">
+    <button class="dock-tool active" id="bottomBrush" title="Kuas">✎<small>Kuas</small></button>
+    <button class="dock-tool" id="bottomEraser" title="Penghapus">⌫<small>Hapus</small></button>
+    <button class="dock-tool" id="bottomText" title="Tambah teks">T<small>Teks</small></button>
+    <button class="dock-tool" id="bottomSticker" title="Tambah stiker">◇<small>Stiker</small></button>
+  </div>
+  <div class="dock-divider"></div>
+  <div class="dock-color">
+    <button class="swatch active" data-color="#ef452e" style="--swatch:#ef452e" title="Merah"></button>
+    <button class="swatch" data-color="#7c3cff" style="--swatch:#7c3cff" title="Ungu"></button>
+    <button class="swatch" data-color="#ffd84a" style="--swatch:#ffd84a" title="Kuning"></button>
+    <button class="swatch" data-color="#36d399" style="--swatch:#36d399" title="Hijau"></button>
+    <button class="swatch" data-color="#2ea7ff" style="--swatch:#2ea7ff" title="Biru"></button>
+    <button class="swatch" data-color="#ffffff" style="--swatch:#ffffff" title="Putih"></button>
+    <input id="bottomColor" type="color" value="#ef452e" title="Warna bebas">
+  </div>
+  <div class="dock-divider"></div>
+  <div class="dock-size"><span>Ukuran</span><input id="bottomBrushSize" type="range" min="1" max="80" value="8"><b id="bottomBrushSizeValue">8</b></div>
+  <div class="dock-spacer"></div>
+  <button class="dock-more" id="rightPanelToggle" title="Panel properti">☷<small>Properti</small></button>
+</div>
 <footer class="editor-footer">
   <div class="footer-status"><span class="status-dot"></span><b>MEDIA ALAT STUDIO</b><span id="footerStatus">Siap bekerja</span></div>
   <div class="footer-shortcuts"><span>Crop</span><kbd>C</kbd><span>Alat</span><kbd>Tab</kbd><span>Esc</span><span>tutup panel</span></div>

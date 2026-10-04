@@ -86,7 +86,7 @@ app.innerHTML=`
   <div class="brand">MEDIA<span>ALAT</span><small>EDITOR FOTO</small></div>
   <div class="top-actions">
     <button class="top-btn primary" id="open">Buka Foto</button>
-    <button class="top-btn" id="cropTop">Pilih Ukuran</button>
+    <button class="top-btn" id="cropTop">✂ Crop / Ukuran</button>
     <button class="top-btn" id="save" disabled>Simpan</button><button class="top-btn" id="logout">Keluar</button>
     <button class="top-btn primary" id="download" disabled>Unduh</button>
   </div>

@@ -166,3 +166,74 @@ header:after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.1
  header{padding:0 10px!important}.top-btn{padding:0 10px!important}.brand small{display:none}
  .toolbar{height:72px!important}.canvas-stage{padding:25px 20px!important}
 }
+
+/* ===== SIDEBAR WORKSPACE / PANEL LAYOUT ===== */
+body{padding-bottom:32px!important}
+header{left:0!important;right:0!important}
+.brand{display:flex!important;align-items:center!important;gap:9px!important}
+.brand-mark{width:32px;height:32px;display:grid;place-items:center;background:linear-gradient(135deg,#ff4b35,#ff7a45);color:#fff;border:2px solid #fff;border-radius:9px;font-weight:1000;box-shadow:3px 3px 0 #000;flex:0 0 32px}
+.tools-sidebar{
+ position:fixed;z-index:45;left:0;top:66px;bottom:32px;width:318px;
+ background:linear-gradient(180deg,#18181f 0%,#121218 100%);
+ border-right:1px solid #34343e;box-shadow:18px 0 55px #0007;
+ overflow-y:auto;overflow-x:hidden;padding:15px 13px 24px;
+ transform:translateX(-105%);transition:transform .25s cubic-bezier(.2,.8,.2,1);
+ scrollbar-width:thin;scrollbar-color:#484852 transparent;
+}
+body.sidebar-open .tools-sidebar{transform:translateX(0)}
+.sidebar-head{display:flex;align-items:center;justify-content:space-between;padding:2px 3px 14px;border-bottom:1px solid #30303a;margin-bottom:12px}
+.sidebar-head strong{display:block;font-size:12px;letter-spacing:1.2px;color:#fff}
+.sidebar-head small{display:block;color:#777783;font-size:9px;margin-top:4px}
+.sidebar-close{width:32px;height:32px;border-radius:9px;background:#25252e;border:1px solid #3b3b46;color:#ddd;font-size:20px;line-height:1}
+.sidebar-close:hover{background:#ff4b35;border-color:#ff4b35;color:#fff}
+.side-section{padding:0 0 13px;margin-bottom:10px;border-bottom:1px solid #292931}
+.side-label{font-size:8px;letter-spacing:1.5px;font-weight:900;color:#70707b;margin:0 3px 8px}
+.side-grid{display:grid;gap:7px}.side-grid.two{grid-template-columns:1fr 1fr}.compact-grid{margin-top:7px}
+.side-tool{
+ min-width:0;min-height:58px;text-align:left;display:flex;flex-direction:column;justify-content:center;
+ padding:8px 9px;background:#202029;border:1px solid #373741;border-radius:10px;color:#eee;
+ box-shadow:0 2px 0 #09090c;transition:.16s ease
+}
+.side-tool span{font-size:16px;font-weight:900;color:#b98aff;line-height:1;margin-bottom:4px}
+.side-tool b{font-size:10px}.side-tool small{font-size:8px;color:#777783;margin-top:3px}
+.side-tool:hover{transform:translateY(-1px);background:#2c263a;border-color:#9c67ff}
+.side-tool.featured{background:linear-gradient(135deg,#3b1d5d,#24202b);border-color:#9d61ff}
+.side-tool.featured span{color:#ff654d}
+.side-readout{grid-column:1/-1;padding:7px 9px;background:#17171e;border:1px dashed #3a3a45;border-radius:8px;color:#9999a5;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.position-box{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:31px 31px 31px;gap:5px;width:108px;margin:auto}
+.position-box .side-icon:first-child{grid-column:2}.position-box .side-icon:nth-child(2){grid-column:1;grid-row:2}.position-box .side-icon:nth-child(3){grid-column:2;grid-row:2}.position-box .side-icon:nth-child(4){grid-column:3;grid-row:2}.position-box .side-icon:nth-child(5){grid-column:2;grid-row:3}
+.side-icon{border:1px solid #3b3b46;background:#23232c;color:#eee;border-radius:7px;font-weight:900}.side-icon:hover{background:#38294f;border-color:#a36dff;color:#fff}
+.side-menu{margin:7px 0;background:#1d1d25;border:1px solid #30303a;border-radius:11px;overflow:visible}
+.side-menu summary{list-style:none;display:grid;grid-template-columns:30px 1fr 18px;align-items:center;gap:7px;padding:10px;cursor:pointer;color:#eee}
+.side-menu summary::-webkit-details-marker{display:none}
+.side-menu summary:hover{background:#24242e}
+.side-menu summary .menu-icon{width:27px;height:27px;display:grid;place-items:center;background:#292933;border:1px solid #3b3b46;border-radius:7px;color:#b98aff;font-weight:900}
+.side-menu summary b{display:block;font-size:10px}.side-menu summary small{display:block;color:#777783;font-size:8px;margin-top:3px}.side-menu summary i{font-style:normal;color:#777783;font-size:18px;transition:.15s}
+.side-menu[open] summary{background:#282331}.side-menu[open] summary i{transform:rotate(90deg);color:#b98aff}
+.side-panel{padding:10px;border-top:1px solid #30303a;background:#18181f}
+.side-panel label{display:block;color:#a6a6b0;font-size:9px;margin:9px 0}.side-panel input[type=range]{width:100%;accent-color:#9a62ff}.side-panel input[type=color]{width:100%;height:34px;padding:2px;background:#22222b;border:1px solid #40404c;border-radius:8px}.side-panel select{width:100%;padding:8px;border-radius:8px;background:#22222b;color:#fff;border:1px solid #40404c}
+.side-panel .secondary{margin-top:5px}.paint-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.paint-actions .secondary{margin-top:0}
+.sidebar-tip{display:flex;gap:8px;margin:13px 2px 0;padding:10px;background:#17171e;border:1px dashed #363640;border-radius:9px;color:#777783;font-size:8px;line-height:1.4}.sidebar-tip strong{color:#ffb84d}
+.workspace{transition:margin-left .25s cubic-bezier(.2,.8,.2,1);height:calc(100vh - 142px)!important}
+body.sidebar-open .workspace{margin-left:318px}
+.editor-footer{
+ position:fixed;z-index:60;left:0;right:0;bottom:0;height:32px;background:#0d0d12;
+ border-top:1px solid #2e2e37;color:#858590;display:flex;align-items:center;justify-content:space-between;
+ padding:0 14px;font-size:8px;letter-spacing:.5px
+}
+.footer-status,.footer-shortcuts{display:flex;align-items:center;gap:7px}.footer-status b{color:#ddd}.status-dot{width:6px;height:6px;border-radius:50%;background:#48d17b;box-shadow:0 0 0 3px #48d17b18}
+.footer-shortcuts{color:#686873}.footer-shortcuts kbd{font:700 8px monospace;color:#aaa;background:#202028;border:1px solid #363640;border-radius:4px;padding:2px 5px}
+.top-actions .top-btn:first-child{display:inline-flex}
+@media(max-width:900px){
+ .tools-sidebar{width:292px}.sidebar-head{padding-top:2px}
+ body.sidebar-open .workspace{margin-left:292px}
+ .footer-shortcuts{display:none}
+ .top-actions .top-btn{padding:0 9px!important}
+ .top-actions .top-btn:first-child{display:inline-flex}
+}
+@media(max-width:680px){
+ .tools-sidebar{width:min(88vw,318px);bottom:32px}
+ body.sidebar-open .workspace{margin-left:0}
+ .workspace{margin-left:0!important}
+ .editor-footer{padding:0 9px}.footer-status span:last-child{display:none}
+}

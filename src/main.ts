@@ -438,11 +438,12 @@ document.querySelector("#centerMove")!.addEventListener("click",()=>{panX=panY=0
 // Navigasi kanvas: tombol panah keyboard + seret dengan mouse.
 // Klik kiri tetap untuk menggambar; klik kanan/tengah untuk menggeser kanvas.
 let panning=false;
+let spacePan=false;
 let panStart={x:0,y:0,px:0,py:0};
 canvas.addEventListener("contextmenu",e=>e.preventDefault());
 canvas.addEventListener("pointerdown",e=>{
  if(!source)return;
- const wantsPan=e.button===2||e.button===1||e.shiftKey||e.spaceKey;
+ const wantsPan=e.button===2||e.button===1||e.shiftKey||spacePan;
  if(wantsPan){
   panning=true;
   panStart={x:e.clientX,y:e.clientY,px:panX,py:panY};
@@ -467,6 +468,7 @@ canvas.addEventListener("pointerup",e=>{
 });
 canvas.addEventListener("pointercancel",()=>{panning=false;canvas.classList.remove("panning")});
 document.addEventListener("keydown",e=>{
+ if(e.code==="Space" && !["INPUT","TEXTAREA","SELECT"].includes((e.target as HTMLElement)?.tagName)){spacePan=true;canvas.classList.add("pan-ready");e.preventDefault();return}
  if(["INPUT","TEXTAREA","SELECT"].includes((e.target as HTMLElement)?.tagName))return;
  const step=e.shiftKey?40:12;
  if(e.key==="ArrowUp"){e.preventDefault();nudge(0,-step/12)}
@@ -474,6 +476,7 @@ document.addEventListener("keydown",e=>{
  if(e.key==="ArrowLeft"){e.preventDefault();nudge(-step/12,0)}
  if(e.key==="ArrowRight"){e.preventDefault();nudge(step/12,0)}
 });
+document.addEventListener("keyup",e=>{if(e.code==="Space"){spacePan=false;canvas.classList.remove("pan-ready")}});
 for(const id of ["brightness","contrast","saturation","gray"] as const)document.querySelector<HTMLInputElement>("#"+id)!.oninput=e=>{filter={...filter,[id]:Number((e.target as HTMLInputElement).value)};draw()};
 document.querySelector("#reset")!.addEventListener("click",()=>{filter={brightness:100,contrast:100,saturation:100,gray:0};for(const [k,v] of Object.entries(filter))document.querySelector<HTMLInputElement>("#"+k)!.value=String(v);draw()});
 

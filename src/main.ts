@@ -231,7 +231,20 @@ function draw(){
  for(const a of assets){const img=new Image();img.onload=()=>{ctx.save();ctx.translate(a.x,a.y);ctx.rotate(a.rotation*Math.PI/180);ctx.drawImage(img,-a.width/2,-a.height/2,a.width,a.height);ctx.restore()};img.src=a.src}
  for(const t of texts){ctx.font="bold "+t.size+"px Arial";ctx.textAlign="left";ctx.textBaseline="middle";ctx.lineWidth=Math.max(4,t.size*.08);ctx.strokeStyle="#000";ctx.fillStyle="#fff";ctx.strokeText(t.text,t.x,t.y);ctx.fillText(t.text,t.x,t.y)}
 }
-function load(file:File){if(!file.type.startsWith("image/"))return;const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{source=img;rotation=0;flipX=flipY=1;panX=panY=0;selectedProfile=null;customSize=null;assets=[];texts=[];componentSelection=null;selectingComponent=false;document.querySelector("#empty")?.setAttribute("hidden","true");document.querySelector("#canvasWrap")?.removeAttribute("hidden");document.querySelector<HTMLButtonElement>("#download")!.disabled=false;document.querySelector<HTMLButtonElement>("#save")!.disabled=false;showSize(img.naturalWidth,img.naturalHeight,"Ukuran asli");draw();URL.revokeObjectURL(url)};img.src=url}
+function load(file:File){
+ if(!file.type.startsWith("image/"))return;
+ const reader=new FileReader();
+ reader.onload=()=>{
+  if(typeof reader.result!=="string")return;
+  const img=new Image();
+  img.onload=()=>{
+   source=img;sourceDataUrl=reader.result as string;rotation=0;flipX=flipY=1;panX=panY=0;selectedProfile=null;customSize=null;assets=[];texts=[];componentSelection=null;selectingComponent=false;
+   document.querySelector("#empty")?.setAttribute("hidden","true");document.querySelector("#canvasWrap")?.removeAttribute("hidden");document.querySelector<HTMLButtonElement>("#download")!.disabled=false;document.querySelector<HTMLButtonElement>("#save")!.disabled=false;showSize(img.naturalWidth,img.naturalHeight,"Ukuran asli");draw();
+  };
+  img.src=reader.result as string;
+ };
+ reader.readAsDataURL(file);
+}
 photoInput.onchange=()=>{if(photoInput.files?.[0])load(photoInput.files[0])};
 document.querySelector("#choose")!.addEventListener("click",()=>photoInput.click());document.querySelector("#open")!.addEventListener("click",()=>photoInput.click());
 

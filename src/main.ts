@@ -230,6 +230,7 @@ function draw(){
  const scale=Math.max(cw/(sw?ih:iw),ch/(sw?iw:ih));ctx.drawImage(source,-iw*scale/2,-ih*scale/2,iw*scale,ih*scale);ctx.restore();ctx.filter="none";
  for(const a of assets){const img=new Image();img.onload=()=>{ctx.save();ctx.translate(a.x,a.y);ctx.rotate(a.rotation*Math.PI/180);ctx.drawImage(img,-a.width/2,-a.height/2,a.width,a.height);ctx.restore()};img.src=a.src}
  for(const t of texts){ctx.font="bold "+t.size+"px Arial";ctx.textAlign="left";ctx.textBaseline="middle";ctx.lineWidth=Math.max(4,t.size*.08);ctx.strokeStyle="#000";ctx.fillStyle="#fff";ctx.strokeText(t.text,t.x,t.y);ctx.fillText(t.text,t.x,t.y)}
+ scheduleDraft();
 }
 function load(file:File){
  if(!file.type.startsWith("image/"))return;

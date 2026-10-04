@@ -87,7 +87,7 @@ app.innerHTML=`
   <div class="top-actions">
     <button class="top-btn primary" id="open">Buka Foto</button>
     <button class="top-btn" id="cropTop">Pilih Ukuran</button>
-    <button class="top-btn" id="save" disabled>Simpan</button>
+    <button class="top-btn" id="save" disabled>Simpan</button><button class="top-btn" id="logout">Keluar</button>
     <button class="top-btn" id="logout">Keluar</button>
     <button class="top-btn primary" id="download" disabled>Unduh</button>
   </div>
@@ -161,7 +161,7 @@ app.innerHTML=`
       <button class="secondary" id="clearPaint">Hapus semua coretan</button>
     </div>
   </details>
-  <details class="tool-dropdown export-dropdown">
+  <details class="tool-dropdown"><summary>Gambar</summary><div class="dropdown-panel paint-panel"><div class="paint-modes"><button class="paint-choice active" id="brushTool">Kuas</button><button class="paint-choice" id="eraserTool">Hapus</button><button class="paint-choice" id="lineTool">Garis</button><button class="paint-choice" id="rectTool">Kotak</button><button class="paint-choice" id="circleTool">Lingkaran</button></div><label>Warna<input id="brushColor" type="color" value="#ef452e"></label><label>Ukuran kuas<input id="brushSize" type="range" min="1" max="80" value="8"></label><label>Opasitas<input id="brushOpacity" type="range" min="10" max="100" value="100"></label><button class="secondary" id="clearPaint">Hapus semua coretan</button></div></details>  <details class="tool-dropdown export-dropdown">
     <summary>Ekspor</summary>
     <div class="dropdown-panel">
       <label>Format<select id="format"><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option></select></label>

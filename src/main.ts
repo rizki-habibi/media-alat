@@ -42,25 +42,103 @@ const profiles:Profile[]=[
 
 const app=document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML=`
-<header><div class="brand">MEDIA<span>ALAT</span></div><div class="top-actions"><button id="open">Buka Foto</button><button id="cropTop">Pilih Ukuran</button><button id="save" disabled>Simpan</button><button id="download" disabled>Unduh</button></div></header>
-<main><aside class="sidebar">
-<section><h3>Kanvas</h3><button class="size-trigger" id="openSize">Pilih platform & ukuran</button><div class="size-readout" id="sizeReadout">Ukuran asli</div><button class="secondary" id="originalSize">Gunakan ukuran asli</button></section>
-<section><h3>Transformasi</h3><div class="grid"><button class="tool" id="left">Putar kiri</button><button class="tool" id="right">Putar kanan</button><button class="tool" id="flipX">Balik X</button><button class="tool" id="flipY">Balik Y</button></div></section>
-<section><h3>Filter</h3><label>Kecerahan <input id="brightness" type="range" min="0" max="200" value="100"></label><label>Kontras <input id="contrast" type="range" min="0" max="200" value="100"></label><label>Saturasi <input id="saturation" type="range" min="0" max="200" value="100"></label><label>Grayscale <input id="gray" type="range" min="0" max="100" value="0"></label><button class="secondary" id="reset">Reset Filter</button></section>
-<section><h3>Stiker Komponen</h3><p class="section-note">Ambil bagian dari foto atau logo yang sudah dimasukkan, lalu jadikan elemen stiker gambar.</p><button class="secondary" id="stickerFromComponent">Ambil Komponen dari Foto</button><button class="secondary" id="stickerUpload">Tambah Gambar sebagai Stiker</button><div class="sticker-status" id="stickerStatus">Belum ada komponen yang dipilih.</div></section>
-</aside>
-<section class="workspace" id="workspace"><div class="empty" id="empty"><div class="drop-icon">＋</div><h2>Masukkan foto untuk mulai</h2><p>Seret foto ke sini atau pilih foto.</p><button id="choose">Pilih Foto</button></div><div class="canvas-wrap" id="canvasWrap" hidden><canvas id="canvas"></canvas></div></section>
-<aside class="rightbar"><section><h3>Elemen</h3><button class="action" id="text">Tambah Teks</button><button class="action" id="logo">Tambah Logo</button><button class="action" id="removeAsset">Hapus Elemen</button></section><section><h3>Ekspor</h3><label>Format<select id="format"><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option></select></label><label>Kualitas<input id="quality" type="range" min="50" max="100" value="92"></label></section><div class="hint">Pilih ukuran berdasarkan tujuan publikasi. Foto akan dipotong otomatis mengikuti ukuran tujuan tanpa diregangkan.</div></aside></main>
+<header>
+  <div class="brand">MEDIA<span>ALAT</span><small>EDITOR FOTO</small></div>
+  <div class="top-actions">
+    <button class="top-btn primary" id="open">Buka Foto</button>
+    <button class="top-btn" id="cropTop">Pilih Ukuran</button>
+    <button class="top-btn" id="save" disabled>Simpan</button>
+    <button class="top-btn primary" id="download" disabled>Unduh</button>
+  </div>
+</header>
+<nav class="toolbar" aria-label="Alat editor">
+  <div class="tool-group">
+    <span class="toolbar-title">Kanvas</span>
+    <button class="tool-pill" id="openSize">Ukuran</button>
+    <span class="size-readout" id="sizeReadout">Ukuran asli</span>
+  </div>
+  <div class="tool-group">
+    <span class="toolbar-title">Posisi</span>
+    <div class="arrow-pad">
+      <button class="arrow-btn" id="up" title="Geser ke atas" aria-label="Geser ke atas">↑</button>
+      <button class="arrow-btn" id="leftMove" title="Geser ke kiri" aria-label="Geser ke kiri">←</button>
+      <button class="arrow-btn center" id="centerMove" title="Kembalikan ke tengah" aria-label="Kembalikan ke tengah">•</button>
+      <button class="arrow-btn" id="rightMove" title="Geser ke kanan" aria-label="Geser ke kanan">→</button>
+      <button class="arrow-btn" id="down" title="Geser ke bawah" aria-label="Geser ke bawah">↓</button>
+    </div>
+  </div>
+  <div class="tool-group compact">
+    <span class="toolbar-title">Putar</span>
+    <button class="icon-btn" id="left" title="Putar kiri" aria-label="Putar kiri">↶</button>
+    <button class="icon-btn" id="right" title="Putar kanan" aria-label="Putar kanan">↷</button>
+  </div>
+  <div class="tool-group compact">
+    <span class="toolbar-title">Balik</span>
+    <button class="icon-btn" id="flipX" title="Balik horizontal" aria-label="Balik horizontal">↔</button>
+    <button class="icon-btn" id="flipY" title="Balik vertikal" aria-label="Balik vertikal">↕</button>
+  </div>
+  <details class="tool-dropdown">
+    <summary>Filter</summary>
+    <div class="dropdown-panel filter-panel">
+      <label>Kecerahan<input id="brightness" type="range" min="0" max="200" value="100"></label>
+      <label>Kontras<input id="contrast" type="range" min="0" max="200" value="100"></label>
+      <label>Saturasi<input id="saturation" type="range" min="0" max="200" value="100"></label>
+      <label>Grayscale<input id="gray" type="range" min="0" max="100" value="0"></label>
+      <button class="secondary" id="reset">Reset filter</button>
+    </div>
+  </details>
+  <details class="tool-dropdown">
+    <summary>Stiker</summary>
+    <div class="dropdown-panel sticker-panel">
+      <p class="section-note">Ambil bagian dari foto/logo lalu jadikan stiker gambar.</p>
+      <button class="secondary" id="stickerFromComponent">Ambil komponen</button>
+      <button class="secondary" id="stickerUpload">Tambah gambar</button>
+      <div class="sticker-status" id="stickerStatus">Belum ada komponen.</div>
+    </div>
+  </details>
+  <details class="tool-dropdown">
+    <summary>Elemen</summary>
+    <div class="dropdown-panel">
+      <button class="secondary" id="text">Tambah teks</button>
+      <button class="secondary" id="logo">Tambah logo</button>
+      <button class="secondary" id="removeAsset">Hapus elemen</button>
+    </div>
+  </details>
+  <details class="tool-dropdown export-dropdown">
+    <summary>Ekspor</summary>
+    <div class="dropdown-panel">
+      <label>Format<select id="format"><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option></select></label>
+      <label>Kualitas<input id="quality" type="range" min="50" max="100" value="92"></label>
+    </div>
+  </details>
+  <button class="tool-pill" id="originalSize">Asli</button>
+</nav>
+<main>
+  <section class="workspace" id="workspace">
+    <div class="canvas-stage">
+      <div class="empty" id="empty">
+        <div class="drop-icon">＋</div>
+        <h2>Masukkan foto untuk mulai</h2>
+        <p>Seret foto ke area ini atau pilih foto.</p>
+        <button class="choose-btn" id="choose">Pilih Foto</button>
+      </div>
+      <div class="canvas-wrap" id="canvasWrap" hidden><canvas id="canvas"></canvas></div>
+    </div>
+    <div class="workspace-hint">Seret foto ke sini • Gunakan panah untuk mengatur posisi • Ukuran dapat dipilih kapan saja</div>
+  </section>
+</main>
 <div class="modal-backdrop" id="sizeModal" hidden><div class="size-modal">
-<div class="modal-head"><div><strong>Ukuran untuk publikasi</strong><span>Pilih platform dan tujuan. Belum memilih pun boleh ditutup; kanvas tetap memakai ukuran foto asli.</span></div><div class="modal-head-actions"><button type="button" class="original-modal" id="originalModal">Ukuran asli</button><button type="button" class="close" id="closeSize">Tutup</button></div></div><input class="profile-search" id="profileSearch" type="search" placeholder="Cari platform, tujuan, atau ukuran...">
+<div class="modal-head"><div><strong>Ukuran untuk publikasi</strong><span>Pilih platform dan tujuan. Jika belum yakin, tutup saja — foto tetap memakai ukuran aslinya.</span></div><div class="modal-head-actions"><button type="button" class="original-modal" id="originalModal">Ukuran asli</button><button type="button" class="close" id="closeSize">Tutup</button></div></div>
+<input class="profile-search" id="profileSearch" type="search" placeholder="Cari platform, tujuan, atau ukuran...">
 <div class="platform-tabs" id="platformTabs"></div><div class="profile-grid" id="profileGrid"></div>
 <div class="custom-fields" id="customFields"><input id="customW" type="number" min="1" placeholder="Lebar px"><input id="customH" type="number" min="1" placeholder="Tinggi px"><button id="applyCustom">Ukuran custom</button></div>
 </div></div>`;
+`;
 
 const canvas=document.querySelector<HTMLCanvasElement>("#canvas")!,ctx=canvas.getContext("2d")!;
 const photoInput=document.createElement("input"),assetInput=document.createElement("input");
 for(const input of [photoInput,assetInput]){input.type="file";input.accept="image/*";input.hidden=true;document.body.appendChild(input)}
-let source:HTMLImageElement|null=null,rotation=0,flipX=1,flipY=1;
+let source:HTMLImageElement|null=null,rotation=0,flipX=1,flipY=1,panX=0,panY=0;
 let filter:FilterState={brightness:100,contrast:100,saturation:100,gray:0};
 let selectedProfile:Profile|null=null,customSize:{w:number;h:number}|null=null;
 let assets:{src:string;x:number;y:number;width:number;height:number;rotation:number}[]=[];
@@ -85,7 +163,7 @@ async function saveProject(){
  const name=prompt("Nama proyek:",selectedProfile?.purpose||"Proyek Media Alat");
  if(!name)return;
  const out=cropDimensions();
- const payload={name,width:out.w,height:out.h,platform:selectedProfile?.platform||null,purpose:selectedProfile?.purpose||null,profile_id:selectedProfile?.id||null,owner_key:ownerKey,state:{rotation,flipX,flipY,filter}};
+ const payload={name,width:out.w,height:out.h,platform:selectedProfile?.platform||null,purpose:selectedProfile?.purpose||null,profile_id:selectedProfile?.id||null,owner_key:ownerKey,state:{rotation,flipX,flipY,panX,panY,filter}};
  const response=await fetch(SUPABASE_URL+"/rest/v1/media_projects",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json","Prefer":"return=minimal","x-media-owner":ownerKey},body:JSON.stringify(payload)});
  if(!response.ok){alert("Gagal menyimpan proyek ke Supabase.");return;}
  alert("Proyek tersimpan di Supabase.");
@@ -98,13 +176,13 @@ function draw(){
  if(!source)return;
  const out=cropDimensions(),cw=out.w,ch=out.h;canvas.width=cw;canvas.height=ch;ctx.clearRect(0,0,cw,ch);
  const rad=rotation*Math.PI/180,sw=Math.abs(rotation)%180===90,iw=source.naturalWidth,ih=source.naturalHeight;
- ctx.save();ctx.translate(cw/2,ch/2);ctx.rotate(rad);ctx.scale(flipX,flipY);
+ ctx.save();ctx.translate(cw/2+panX,ch/2+panY);ctx.rotate(rad);ctx.scale(flipX,flipY);
  ctx.filter=`brightness(${filter.brightness}%) contrast(${filter.contrast}%) saturate(${filter.saturation}%) grayscale(${filter.gray}%)`;
  const scale=Math.max(cw/(sw?ih:iw),ch/(sw?iw:ih));ctx.drawImage(source,-iw*scale/2,-ih*scale/2,iw*scale,ih*scale);ctx.restore();ctx.filter="none";
  for(const a of assets){const img=new Image();img.onload=()=>{ctx.save();ctx.translate(a.x,a.y);ctx.rotate(a.rotation*Math.PI/180);ctx.drawImage(img,-a.width/2,-a.height/2,a.width,a.height);ctx.restore()};img.src=a.src}
  for(const t of texts){ctx.font="bold "+t.size+"px Arial";ctx.textAlign="left";ctx.textBaseline="middle";ctx.lineWidth=Math.max(4,t.size*.08);ctx.strokeStyle="#000";ctx.fillStyle="#fff";ctx.strokeText(t.text,t.x,t.y);ctx.fillText(t.text,t.x,t.y)}
 }
-function load(file:File){if(!file.type.startsWith("image/"))return;const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{source=img;rotation=0;flipX=flipY=1;selectedProfile=null;customSize=null;assets=[];texts=[];componentSelection=null;selectingComponent=false;document.querySelector("#empty")?.setAttribute("hidden","true");document.querySelector("#canvasWrap")?.removeAttribute("hidden");document.querySelector<HTMLButtonElement>("#download")!.disabled=false;document.querySelector<HTMLButtonElement>("#save")!.disabled=false;showSize(img.naturalWidth,img.naturalHeight,"Ukuran asli");draw();URL.revokeObjectURL(url)};img.src=url}
+function load(file:File){if(!file.type.startsWith("image/"))return;const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{source=img;rotation=0;flipX=flipY=1;panX=panY=0;selectedProfile=null;customSize=null;assets=[];texts=[];componentSelection=null;selectingComponent=false;document.querySelector("#empty")?.setAttribute("hidden","true");document.querySelector("#canvasWrap")?.removeAttribute("hidden");document.querySelector<HTMLButtonElement>("#download")!.disabled=false;document.querySelector<HTMLButtonElement>("#save")!.disabled=false;showSize(img.naturalWidth,img.naturalHeight,"Ukuran asli");draw();URL.revokeObjectURL(url)};img.src=url}
 photoInput.onchange=()=>{if(photoInput.files?.[0])load(photoInput.files[0])};
 document.querySelector("#choose")!.addEventListener("click",()=>photoInput.click());document.querySelector("#open")!.addEventListener("click",()=>photoInput.click());
 
@@ -151,6 +229,8 @@ document.querySelector("#openSize")!.addEventListener("click",openSize);document
 document.querySelector("#applyCustom")!.addEventListener("click",()=>{const w=Number((document.querySelector("#customW") as HTMLInputElement).value),h=Number((document.querySelector("#customH") as HTMLInputElement).value);if(w>0&&h>0){customSize={w,h};selectedProfile=null;showSize(w,h);draw();closeSize()}});
 
 document.querySelector("#left")!.addEventListener("click",()=>{rotation=(rotation+270)%360;draw()});document.querySelector("#right")!.addEventListener("click",()=>{rotation=(rotation+90)%360;draw()});document.querySelector("#flipX")!.addEventListener("click",()=>{flipX*=-1;draw()});document.querySelector("#flipY")!.addEventListener("click",()=>{flipY*=-1;draw()});
+const nudge=(dx:number,dy:number)=>{if(!source)return;const step=Math.max(4,Math.round(Math.min(canvas.width,canvas.height)*.015));panX+=dx*step;panY+=dy*step;draw()};
+document.querySelector("#up")!.addEventListener("click",()=>nudge(0,-1));document.querySelector("#down")!.addEventListener("click",()=>nudge(0,1));document.querySelector("#leftMove")!.addEventListener("click",()=>nudge(-1,0));document.querySelector("#rightMove")!.addEventListener("click",()=>nudge(1,0));document.querySelector("#centerMove")!.addEventListener("click",()=>{panX=panY=0;draw()});
 for(const id of ["brightness","contrast","saturation","gray"] as const)document.querySelector<HTMLInputElement>("#"+id)!.oninput=e=>{filter={...filter,[id]:Number((e.target as HTMLInputElement).value)};draw()};
 document.querySelector("#reset")!.addEventListener("click",()=>{filter={brightness:100,contrast:100,saturation:100,gray:0};for(const [k,v] of Object.entries(filter))document.querySelector<HTMLInputElement>("#"+k)!.value=String(v);draw()});
 

@@ -53,7 +53,7 @@ app.innerHTML=`
 <aside class="rightbar"><section><h3>Elemen</h3><button class="action" id="text">Tambah Teks</button><button class="action" id="logo">Tambah Logo</button><button class="action" id="removeAsset">Hapus Elemen</button></section><section><h3>Ekspor</h3><label>Format<select id="format"><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option></select></label><label>Kualitas<input id="quality" type="range" min="50" max="100" value="92"></label></section><div class="hint">Pilih ukuran berdasarkan tujuan publikasi. Foto akan dipotong otomatis mengikuti ukuran tujuan tanpa diregangkan.</div></aside></main>
 <div class="modal-backdrop" id="sizeModal" hidden><div class="size-modal">
 <div class="modal-head"><div><strong>Ukuran untuk publikasi</strong><span>Pilih platform dan tujuan. Belum memilih pun boleh ditutup; kanvas tetap memakai ukuran foto asli.</span></div><div class="modal-head-actions"><button class="original-modal" id="originalModal">Ukuran asli</button><button class="close" id="closeSize">Tutup</button></div></div><input class="profile-search" id="profileSearch" type="search" placeholder="Cari platform, tujuan, atau ukuran...">
-<div class="platform-tabs" id="platformTabs"></div><div class="profile-grid" id="profileGrid"></div>
+<div class="platform-tabs" id="platformTabs"></div><div class="profile-grid" id="profileGrid"></div><div class="profile-empty" id="profileHint">Pilih platform di atas untuk melihat semua ukuran.</div>
 <div class="custom-fields" id="customFields"><input id="customW" type="number" min="1" placeholder="Lebar px"><input id="customH" type="number" min="1" placeholder="Tinggi px"><button id="applyCustom">Ukuran custom</button></div>
 </div></div>`;
 

@@ -429,7 +429,51 @@ document.querySelector("#applyCustom")!.addEventListener("click",()=>{const w=Nu
 
 document.querySelector("#left")!.addEventListener("click",()=>{rotation=(rotation+270)%360;draw()});document.querySelector("#right")!.addEventListener("click",()=>{rotation=(rotation+90)%360;draw()});document.querySelector("#flipX")!.addEventListener("click",()=>{flipX*=-1;draw()});document.querySelector("#flipY")!.addEventListener("click",()=>{flipY*=-1;draw()});
 const nudge=(dx:number,dy:number)=>{if(!source)return;const step=Math.max(4,Math.round(Math.min(canvas.width,canvas.height)*.015));panX+=dx*step;panY+=dy*step;draw()};
-document.querySelector("#up")!.addEventListener("click",()=>nudge(0,-1));document.querySelector("#down")!.addEventListener("click",()=>nudge(0,1));document.querySelector("#leftMove")!.addEventListener("click",()=>nudge(-1,0));document.querySelector("#rightMove")!.addEventListener("click",()=>nudge(1,0));document.querySelector("#centerMove")!.addEventListener("click",()=>{panX=panY=0;draw()});
+document.querySelector("#up")!.addEventListener("click",()=>nudge(0,-1));
+document.querySelector("#down")!.addEventListener("click",()=>nudge(0,1));
+document.querySelector("#leftMove")!.addEventListener("click",()=>nudge(-1,0));
+document.querySelector("#rightMove")!.addEventListener("click",()=>nudge(1,0));
+document.querySelector("#centerMove")!.addEventListener("click",()=>{panX=panY=0;draw();setFooterStatus("Kanvas dikembalikan ke tengah")});
+
+// Navigasi kanvas: tombol panah keyboard + seret dengan mouse.
+// Klik kiri tetap untuk menggambar; klik kanan/tengah untuk menggeser kanvas.
+let panning=false;
+let panStart={x:0,y:0,px:0,py:0};
+canvas.addEventListener("contextmenu",e=>e.preventDefault());
+canvas.addEventListener("pointerdown",e=>{
+ if(!source)return;
+ const wantsPan=e.button===2||e.button===1||e.shiftKey||e.spaceKey;
+ if(wantsPan){
+  panning=true;
+  panStart={x:e.clientX,y:e.clientY,px:panX,py:panY};
+  canvas.setPointerCapture(e.pointerId);
+  canvas.classList.add("panning");
+  e.preventDefault();
+ }
+});
+canvas.addEventListener("pointermove",e=>{
+ if(!panning)return;
+ panX=panStart.px+(e.clientX-panStart.x);
+ panY=panStart.py+(e.clientY-panStart.y);
+ draw();
+});
+canvas.addEventListener("pointerup",e=>{
+ if(panning){
+  panning=false;
+  canvas.classList.remove("panning");
+  if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);
+  scheduleDraft();
+ }
+});
+canvas.addEventListener("pointercancel",()=>{panning=false;canvas.classList.remove("panning")});
+document.addEventListener("keydown",e=>{
+ if(["INPUT","TEXTAREA","SELECT"].includes((e.target as HTMLElement)?.tagName))return;
+ const step=e.shiftKey?40:12;
+ if(e.key==="ArrowUp"){e.preventDefault();nudge(0,-step/12)}
+ if(e.key==="ArrowDown"){e.preventDefault();nudge(0,step/12)}
+ if(e.key==="ArrowLeft"){e.preventDefault();nudge(-step/12,0)}
+ if(e.key==="ArrowRight"){e.preventDefault();nudge(step/12,0)}
+});
 for(const id of ["brightness","contrast","saturation","gray"] as const)document.querySelector<HTMLInputElement>("#"+id)!.oninput=e=>{filter={...filter,[id]:Number((e.target as HTMLInputElement).value)};draw()};
 document.querySelector("#reset")!.addEventListener("click",()=>{filter={brightness:100,contrast:100,saturation:100,gray:0};for(const [k,v] of Object.entries(filter))document.querySelector<HTMLInputElement>("#"+k)!.value=String(v);draw()});
 

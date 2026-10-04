@@ -103,15 +103,38 @@ photoInput.onchange=()=>{if(photoInput.files?.[0])load(photoInput.files[0])};
 document.querySelector("#choose")!.addEventListener("click",()=>photoInput.click());document.querySelector("#open")!.addEventListener("click",()=>photoInput.click());
 
 const modal=document.querySelector<HTMLElement>("#sizeModal")!,tabs=document.querySelector("#platformTabs")!,grid=document.querySelector("#profileGrid")!;
-function renderProfiles(platform=platforms[0],query=""){
- tabs.innerHTML=platforms.map(p=>`<button class="platform-tab ${p===platform?"active":""}" data-platform="${p}">${p}</button>`).join("");
- grid.innerHTML=profiles.filter(p=>p.platform===platform && (!query || `${p.platform} ${p.purpose} ${p.width}x${p.height} ${p.note}`.toLowerCase().includes(query.toLowerCase()))).map(p=>`<button class="profile-card" data-id="${p.id}"><span class="profile-preview" style="aspect-ratio:${p.width}/${p.height}"></span><span><strong>${p.purpose}</strong><small>${p.width} × ${p.height}</small><small>${p.note}</small></span></button>`).join("");
- tabs.querySelectorAll<HTMLButtonElement>(".platform-tab").forEach(b=>b.onclick=()=>renderProfiles(b.dataset.platform!));
- grid.querySelectorAll<HTMLButtonElement>(".profile-card").forEach(b=>b.onclick=()=>{const p=profiles.find(x=>x.id===b.dataset.id)!;selectedProfile=p;customSize=null;showSize(p.width,p.height,p.purpose);draw();modal.hidden=true});
+function profileCard(p:Profile){
+ return `<button class="profile-card" data-id="${p.id}"><span class="profile-preview" style="aspect-ratio:${p.width}/${p.height}"></span><span><strong>${p.purpose}</strong><small>${p.width} × ${p.height} px</small><small>${p.note}</small></span></button>`;
 }
-function openSize(){renderProfiles();modal.hidden=false;document.querySelector<HTMLInputElement>("#profileSearch")!.focus()}
+function bindProfileCards(){
+ grid.querySelectorAll<HTMLButtonElement>(".profile-card").forEach(b=>b.onclick=()=>{
+  const p=profiles.find(x=>x.id===b.dataset.id)!;
+  selectedProfile=p;customSize=null;showSize(p.width,p.height,p.purpose);draw();modal.hidden=true;
+ });
+}
+function renderProfiles(platform=platforms[0],query=""){
+ const q=query.trim().toLowerCase();
+ tabs.innerHTML=platforms.map(p=>`<button class="platform-tab ${p===platform?"active":""}" data-platform="${p}">${p}</button>`).join("");
+ const list=profiles.filter(p=>p.platform===platform && (!q || `${p.platform} ${p.purpose} ${p.width}x${p.height} ${p.note}`.toLowerCase().includes(q)));
+ grid.innerHTML=list.length?list.map(profileCard).join(""):`<div class="profile-empty">Tidak ditemukan di ${platform}. Hapus pencarian untuk melihat semua ukuran.</div>`;
+ bindProfileCards();
+ tabs.querySelectorAll<HTMLButtonElement>(".platform-tab").forEach(b=>b.onclick=()=>renderProfiles(b.dataset.platform!,q));
+}
+function renderAllMatches(query=""){
+ const q=query.trim().toLowerCase();
+ const list=profiles.filter(p=>!q || `${p.platform} ${p.purpose} ${p.width}x${p.height} ${p.note}`.toLowerCase().includes(q));
+ grid.innerHTML=list.length?list.map(profileCard).join(""):`<div class="profile-empty">Ukuran tidak ditemukan. Coba nama platform atau ukuran lain.</div>`;
+ bindProfileCards();
+}
+function openSize(){
+ renderProfiles();
+ modal.hidden=false;
+ const input=document.querySelector<HTMLInputElement>("#profileSearch")!;
+ input.value="";
+ setTimeout(()=>input.focus(),0);
+}
 function closeSize(){modal.hidden=true}
-document.querySelector("#openSize")!.addEventListener("click",openSize);document.querySelector("#originalSize")!.addEventListener("click",()=>{if(source){selectedProfile=null;customSize=null;showSize(source.naturalWidth,source.naturalHeight,"Ukuran asli");draw()}});document.querySelector("#originalModal")!.addEventListener("click",()=>{if(source){selectedProfile=null;customSize=null;showSize(source.naturalWidth,source.naturalHeight,"Ukuran asli");draw();closeSize()}});document.querySelector("#profileSearch")!.addEventListener("input",e=>{const q=(e.target as HTMLInputElement).value.toLowerCase();const active=tabs.querySelector<HTMLButtonElement>(".platform-tab.active")?.dataset.platform||platforms[0];grid.innerHTML=profiles.filter(p=>p.platform===active && (!q || `${p.platform} ${p.purpose} ${p.width}x${p.height} ${p.note}`.toLowerCase().includes(q))).map(p=>`<button class="profile-card" data-id="${p.id}"><span class="profile-preview" style="aspect-ratio:${p.width}/${p.height}"></span><span><strong>${p.purpose}</strong><small>${p.width} × ${p.height}</small><small>${p.note}</small></span></button>`).join("");grid.querySelectorAll<HTMLButtonElement>(".profile-card").forEach(b=>b.onclick=()=>{const p=profiles.find(x=>x.id===b.dataset.id)!;selectedProfile=p;customSize=null;showSize(p.width,p.height,p.purpose);draw();modal.hidden=true})});document.querySelector("#cropTop")!.addEventListener("click",openSize);document.querySelector("#closeSize")!.addEventListener("click",closeSize);modal.addEventListener("click",e=>{if(e.target===modal)closeSize()});
+document.querySelector("#openSize")!.addEventListener("click",openSize);document.querySelector("#originalSize")!.addEventListener("click",()=>{if(source){selectedProfile=null;customSize=null;showSize(source.naturalWidth,source.naturalHeight,"Ukuran asli");draw()}});document.querySelector("#originalModal")!.addEventListener("click",()=>{if(source){selectedProfile=null;customSize=null;showSize(source.naturalWidth,source.naturalHeight,"Ukuran asli");draw();closeSize()}});document.querySelector("#profileSearch")!.addEventListener("input",e=>{const q=(e.target as HTMLInputElement).value; if(q.trim()) renderAllMatches(q); else {const active=tabs.querySelector<HTMLButtonElement>(".platform-tab.active")?.dataset.platform||platforms[0];renderProfiles(active);}});document.querySelector("#cropTop")!.addEventListener("click",openSize);document.querySelector("#closeSize")!.addEventListener("click",closeSize);modal.addEventListener("click",e=>{if(e.target===modal)closeSize()});
 document.querySelector("#applyCustom")!.addEventListener("click",()=>{const w=Number((document.querySelector("#customW") as HTMLInputElement).value),h=Number((document.querySelector("#customH") as HTMLInputElement).value);if(w>0&&h>0){customSize={w,h};selectedProfile=null;showSize(w,h);draw();closeSize()}});
 
 document.querySelector("#left")!.addEventListener("click",()=>{rotation=(rotation+270)%360;draw()});document.querySelector("#right")!.addEventListener("click",()=>{rotation=(rotation+90)%360;draw()});document.querySelector("#flipX")!.addEventListener("click",()=>{flipX*=-1;draw()});document.querySelector("#flipY")!.addEventListener("click",()=>{flipY*=-1;draw()});

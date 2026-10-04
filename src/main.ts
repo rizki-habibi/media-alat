@@ -171,7 +171,7 @@ setupLogin();
 
 const DRAFT_DB="media-alat-draft";
 let sourceDataUrl="";
-let draftTimer=0;
+let draftTimer:number|undefined;
 function draftDb():Promise<IDBDatabase>{return new Promise((resolve,reject)=>{const req=indexedDB.open(DRAFT_DB,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains("drafts"))req.result.createObjectStore("drafts");};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
 async function saveDraftLocal(){
  if(!source||!sourceDataUrl)return;
@@ -230,7 +230,6 @@ function draw(){
  const scale=Math.max(cw/(sw?ih:iw),ch/(sw?iw:ih));ctx.drawImage(source,-iw*scale/2,-ih*scale/2,iw*scale,ih*scale);ctx.restore();ctx.filter="none";
  for(const a of assets){const img=new Image();img.onload=()=>{ctx.save();ctx.translate(a.x,a.y);ctx.rotate(a.rotation*Math.PI/180);ctx.drawImage(img,-a.width/2,-a.height/2,a.width,a.height);ctx.restore()};img.src=a.src}
  for(const t of texts){ctx.font="bold "+t.size+"px Arial";ctx.textAlign="left";ctx.textBaseline="middle";ctx.lineWidth=Math.max(4,t.size*.08);ctx.strokeStyle="#000";ctx.fillStyle="#fff";ctx.strokeText(t.text,t.x,t.y);ctx.fillText(t.text,t.x,t.y)}
- scheduleDraft();
 }
 function load(file:File){
  if(!file.type.startsWith("image/"))return;
@@ -298,7 +297,7 @@ for(const id of ["brightness","contrast","saturation","gray"] as const)document.
 document.querySelector("#reset")!.addEventListener("click",()=>{filter={brightness:100,contrast:100,saturation:100,gray:0};for(const [k,v] of Object.entries(filter))document.querySelector<HTMLInputElement>("#"+k)!.value=String(v);draw()});
 
 function addAsset(src:string){if(!source)return;const img=new Image();img.onload=()=>{const s=Math.min(canvas.width,canvas.height)*.28,scale=Math.min(1,s/Math.max(img.naturalWidth,img.naturalHeight));assets.push({src,x:canvas.width/2,y:canvas.height/2,width:img.naturalWidth*scale,height:img.naturalHeight*scale,rotation:0});draw()};img.src=src}
-assetInput.onchange=()=>{const file=assetInput.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{if(typeof reader.result==="string")addAsset(reader.result)};reader.readAsDataURL(file);assetInput.value=""};
+assetInput.onchange=()=>{if(assetInput.files?.[0]){const u=URL.createObjectURL(assetInput.files[0]);addAsset(u);assetInput.value=""}};
 document.querySelector("#stickerUpload")!.addEventListener("click",()=>assetInput.click());document.querySelector("#logo")!.addEventListener("click",()=>assetInput.click());
 document.querySelector("#removeAsset")!.addEventListener("click",()=>{assets.pop();draw()});document.querySelector("#text")!.addEventListener("click",()=>{if(!source)return;const value=prompt("Teks yang ingin ditambahkan:");if(value)texts.push({text:value,x:canvas.width*.08,y:canvas.height*.15,size:Math.max(32,canvas.width*.06)});draw()});
 document.querySelector("#save")!.addEventListener("click",()=>void saveProject());
@@ -309,4 +308,4 @@ canvas.addEventListener("mousedown",e=>{if(!selectingComponent||!source)return;s
 canvas.addEventListener("mousemove",e=>{if(!selectingComponent||!selectionStart)return;const p=canvasPoint(e);componentSelection={x:Math.min(selectionStart.x,p.x),y:Math.min(selectionStart.y,p.y),w:Math.abs(p.x-selectionStart.x),h:Math.abs(p.y-selectionStart.y)};draw()});
 canvas.addEventListener("mouseup",()=>{if(!selectingComponent||!componentSelection)return;selectionStart=null;if(componentSelection.w<4||componentSelection.h<4){componentSelection=null;updateStickerStatus("Area terlalu kecil. Pilih area komponen yang lebih besar.");draw();return}makeComponentSticker()});
 document.querySelector("#stickerFromComponent")!.addEventListener("click",()=>{if(!source){alert("Masukkan foto atau logo terlebih dahulu.");return}selectingComponent=true;componentSelection=null;selectionStart=null;updateStickerStatus("Mode pilih aktif: seret kotak di atas komponen yang ingin dijadikan stiker.");draw()});
-workspace.addEventListener("dragover",e=>e.preventDefault());workspace.addEventListener("drop",e=>{e.preventDefault();const f=(e as DragEvent).dataTransfer?.files[0];if(f)load(f)});\nif(localStorage.getItem(AUTH_KEY)==="1")void restoreDraft();
+workspace.addEventListener("dragover",e=>e.preventDefault());workspace.addEventListener("drop",e=>{e.preventDefault();const f=(e as DragEvent).dataTransfer?.files[0];if(f)load(f)});

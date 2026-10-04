@@ -42,7 +42,46 @@ const profiles:Profile[]=[
 
 const app=document.querySelector<HTMLDivElement>("#app")!;
 app.innerHTML=`
-<div class="login-screen" id="loginScreen"><div class="login-card"><div class="login-mark">MEDIA<span>ALAT</span></div><div class="login-kicker">EDITOR FOTO</div><h1>Selamat datang</h1><p>Masukkan password untuk membuka ruang kerja Media Alat.</p><form id="loginForm"><label>Password<input id="loginPassword" type="password" autocomplete="current-password" placeholder="Masukkan password"></label><button type="submit" class="login-submit">Masuk</button><div class="login-error" id="loginError"></div></form></div></div>
+<div class="login-screen" id="loginScreen">
+  <div class="comic-bg" aria-hidden="true">
+    <span class="speed speed-1"></span><span class="speed speed-2"></span><span class="speed speed-3"></span>
+    <span class="burst burst-1"></span><span class="burst burst-2"></span>
+    <span class="comic-dot dot-1"></span><span class="comic-dot dot-2"></span><span class="comic-dot dot-3"></span>
+  </div>
+  <div class="comic-layout">
+    <aside class="comic-panel comic-panel-left" aria-hidden="true">
+      <div class="comic-caption">MEDIA</div>
+      <div class="comic-title">ALAT!</div>
+      <div class="comic-stamp">EDIT<br>CREATE<br>SHARE</div>
+      <div class="comic-scribble">WOW!</div>
+    </aside>
+    <section class="login-card">
+      <div class="comic-topline"><span></span><b>EDISI KHUSUS</b><span></span></div>
+      <div class="login-brand"><span>MEDIA</span><strong>ALAT</strong></div>
+      <div class="login-kicker">DIGITAL COMIC PHOTO EDITOR</div>
+      <div class="hero-badge">PANEL #01</div>
+      <h1>Siap masuk<br><em>ke dunia kreatif?</em></h1>
+      <p class="login-copy">Buka ruang kerja kamu dan lanjutkan halaman desain yang terakhir dikerjakan.</p>
+      <form id="loginForm">
+        <label class="comic-label">KATA SANDI
+          <div class="password-wrap">
+            <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Masukkan kata sandi" />
+            <button type="button" id="togglePassword" class="eye-btn" aria-label="Tampilkan kata sandi">LIHAT</button>
+          </div>
+        </label>
+        <button type="submit" class="login-submit"><span>MASUK</span><b>→</b></button>
+        <div class="login-error" id="loginError"></div>
+      </form>
+      <div class="login-note"><span class="dot"></span> Ruang kerja siap memulihkan draft terakhir.</div>
+    </section>
+    <aside class="comic-panel comic-panel-right" aria-hidden="true">
+      <div class="speech">LET'S<br>CREATE!</div>
+      <div class="burst-word">GO!</div>
+      <div class="halftone-card">CREATIVE<br>MODE</div>
+    </aside>
+  </div>
+  <div class="comic-footer" aria-hidden="true"><span>MEDIA ALAT</span><b>STUDIO DIGITAL</b><span>NO. 001</span></div>
+</div>
 <header>
   <div class="brand">MEDIA<span>ALAT</span><small>EDITOR FOTO</small></div>
   <div class="top-actions">
@@ -168,6 +207,15 @@ function setupLogin(){
  });
 }
 setupLogin();
+const togglePassword=document.querySelector<HTMLButtonElement>("#togglePassword");
+const passwordInput=document.querySelector<HTMLInputElement>("#loginPassword");
+togglePassword?.addEventListener("click",()=>{
+ if(!passwordInput)return;
+ const visible=passwordInput.type==="text";
+ passwordInput.type=visible?"password":"text";
+ togglePassword.textContent=visible?"LIHAT":"SEMBUNYI";
+ togglePassword.setAttribute("aria-label",visible?"Tampilkan kata sandi":"Sembunyikan kata sandi");
+});
 
 const DRAFT_DB="media-alat-draft";
 let sourceDataUrl="";

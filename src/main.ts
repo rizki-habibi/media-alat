@@ -449,6 +449,37 @@ const toolsSidebar=document.querySelector<HTMLElement>("#toolsSidebar")!;
 const sidebarToggle=document.querySelector<HTMLButtonElement>("#sidebarToggle")!;
 const sidebarClose=document.querySelector<HTMLButtonElement>("#sidebarClose")!;
 const footerStatus=document.querySelector<HTMLElement>("#footerStatus");
+function refreshRightPanel(){
+ const out=cropDimensions();
+ const size=document.querySelector("#rightCanvasSize"); if(size) size.textContent=out.w+" × "+out.h;
+ const count=document.querySelector("#rightElementCount"); if(count) count.textContent=String(assets.length+texts.length);
+ const list=document.querySelector("#layerList");
+ if(list){
+  const rows=[...assets.map((_,i)=>"<div class=\"layer-row\"><span>◇</span>Stiker "+(i+1)+"</div>"),...texts.map((t,i)=>"<div class=\"layer-row\"><span>T</span>"+t.text+"</div>")];
+  list.innerHTML=rows.length?rows.reverse().join(""):'<div class="layer-empty">Belum ada elemen tambahan.</div>';
+ }
+}
+function setBrushColor(color:string){
+ const a=document.querySelector<HTMLInputElement>("#brushColor"); const b=document.querySelector<HTMLInputElement>("#rightColor"); const c=document.querySelector<HTMLInputElement>("#bottomColor");
+ if(a)a.value=color;if(b)b.value=color;if(c)c.value=color;
+ const preview=document.querySelector<HTMLElement>("#colorPreview");if(preview)preview.style.background=color;
+ const hex=document.querySelector("#colorHex");if(hex)hex.textContent=color.toUpperCase();
+}
+const bottomSize=document.querySelector<HTMLInputElement>("#bottomBrushSize");
+bottomSize?.addEventListener("input",()=>{const v=bottomSize.value;const left=document.querySelector<HTMLInputElement>("#brushSize");if(left)left.value=v;const out=document.querySelector("#bottomBrushSizeValue");if(out)out.textContent=v});
+document.querySelectorAll<HTMLButtonElement>(".swatch").forEach(b=>b.addEventListener("click",()=>setBrushColor(b.dataset.color||"#ef452e")));
+document.querySelector<HTMLInputElement>("#bottomColor")?.addEventListener("input",e=>setBrushColor((e.target as HTMLInputElement).value));
+document.querySelector<HTMLInputElement>("#rightColor")?.addEventListener("input",e=>setBrushColor((e.target as HTMLInputElement).value));
+document.querySelector("#bottomBrush")?.addEventListener("click",()=>{paintMode="brush";document.querySelector("#footerStatus")!.textContent="Kuas aktif"});
+document.querySelector("#bottomEraser")?.addEventListener("click",()=>{paintMode="eraser";document.querySelector("#footerStatus")!.textContent="Penghapus aktif"});
+document.querySelector("#rightBrush")?.addEventListener("click",()=>{paintMode="brush";document.querySelector("#footerStatus")!.textContent="Kuas aktif"});
+document.querySelector("#rightEraser")?.addEventListener("click",()=>{paintMode="eraser";document.querySelector("#footerStatus")!.textContent="Penghapus aktif"});
+document.querySelector("#rightClear")?.addEventListener("click",()=>{ctx.clearRect(0,0,canvas.width,canvas.height);draw();setFooterStatus("Coretan dibersihkan")});
+document.querySelector("#bottomText")?.addEventListener("click",()=>document.querySelector<HTMLButtonElement>("#text")?.click());
+document.querySelector("#bottomSticker")?.addEventListener("click",()=>document.querySelector<HTMLButtonElement>("#stickerUpload")?.click());
+document.querySelector("#rightPanelToggle")?.addEventListener("click",()=>document.body.classList.toggle("right-open"));
+document.querySelector("#rightToggle")?.addEventListener("click",()=>document.body.classList.remove("right-open"));
+refreshRightPanel();
 function setSidebar(open:boolean){
  document.body.classList.toggle("sidebar-open",open);
  localStorage.setItem("media-alat-sidebar",open?"1":"0");

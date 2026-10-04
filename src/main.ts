@@ -51,11 +51,15 @@ let filter:FilterState={brightness:100,contrast:100,saturation:100,gray:0};
 let selectedProfile:Profile|null=null,customSize:{w:number;h:number}|null=null;
 let assets:{src:string;x:number;y:number;width:number;height:number;rotation:number}[]=[];
 let texts:{text:string;x:number;y:number;size:number}[]=[];
-
 const platforms=[...new Set(profiles.map(p=>p.platform))];
 
 function showSize(w:number,h:number,label="Ukuran custom"){document.querySelector("#sizeReadout")!.textContent=label+" • "+w+" × "+h+" px"}
-function cropDimensions(){if(!source)return{w:1,h:1};return customSize||selectedProfile?{w:(customSize||selectedProfile)!.width,h:(customSize||selectedProfile)!.height}:{w:source.naturalWidth,h:source.naturalHeight}}
+function cropDimensions():{w:number;h:number}{
+ if(!source)return{w:1,h:1};
+ if(customSize)return customSize;
+ if(selectedProfile)return{w:selectedProfile.width,h:selectedProfile.height};
+ return{w:source.naturalWidth,h:source.naturalHeight};
+}
 function draw(){
  if(!source)return;
  const out=cropDimensions(),cw=out.w,ch=out.h;canvas.width=cw;canvas.height=ch;ctx.clearRect(0,0,cw,ch);
@@ -73,11 +77,12 @@ document.querySelector("#choose")!.addEventListener("click",()=>photoInput.click
 const modal=document.querySelector<HTMLElement>("#sizeModal")!,tabs=document.querySelector("#platformTabs")!,grid=document.querySelector("#profileGrid")!;
 function renderProfiles(platform=platforms[0]){
  tabs.innerHTML=platforms.map(p=>`<button class="platform-tab ${p===platform?"active":""}" data-platform="${p}">${p}</button>`).join("");
- grid.innerHTML=profiles.filter(p=>p.platform===platform).map((p,i)=>`<button class="profile-card" data-id="${p.id}"><span class="profile-preview" style="aspect-ratio:${p.width}/${p.height}"></span><span><strong>${p.purpose}</strong><small>${p.width} × ${p.height}</small><small>${p.note}</small></span></button>`).join("");
+ grid.innerHTML=profiles.filter(p=>p.platform===platform).map(p=>`<button class="profile-card" data-id="${p.id}"><span class="profile-preview" style="aspect-ratio:${p.width}/${p.height}"></span><span><strong>${p.purpose}</strong><small>${p.width} × ${p.height}</small><small>${p.note}</small></span></button>`).join("");
  tabs.querySelectorAll<HTMLButtonElement>(".platform-tab").forEach(b=>b.onclick=()=>renderProfiles(b.dataset.platform!));
  grid.querySelectorAll<HTMLButtonElement>(".profile-card").forEach(b=>b.onclick=()=>{const p=profiles.find(x=>x.id===b.dataset.id)!;selectedProfile=p;customSize=null;showSize(p.width,p.height,p.purpose);draw();modal.hidden=true});
 }
-function openSize(){renderProfiles();modal.hidden=false}function closeSize(){modal.hidden=true}
+function openSize(){renderProfiles();modal.hidden=false}
+function closeSize(){modal.hidden=true}
 document.querySelector("#openSize")!.addEventListener("click",openSize);document.querySelector("#cropTop")!.addEventListener("click",openSize);document.querySelector("#closeSize")!.addEventListener("click",closeSize);modal.addEventListener("click",e=>{if(e.target===modal)closeSize()});
 document.querySelector("#applyCustom")!.addEventListener("click",()=>{const w=Number((document.querySelector("#customW") as HTMLInputElement).value),h=Number((document.querySelector("#customH") as HTMLInputElement).value);if(w>0&&h>0){customSize={w,h};selectedProfile=null;showSize(w,h);draw();closeSize()}});
 
@@ -86,7 +91,8 @@ for(const id of ["brightness","contrast","saturation","gray"] as const)document.
 document.querySelector("#reset")!.addEventListener("click",()=>{filter={brightness:100,contrast:100,saturation:100,gray:0};for(const [k,v] of Object.entries(filter))document.querySelector<HTMLInputElement>("#"+k)!.value=String(v);draw()});
 
 function addAsset(src:string){if(!source)return;const img=new Image();img.onload=()=>{const s=Math.min(canvas.width,canvas.height)*.28,scale=Math.min(1,s/Math.max(img.naturalWidth,img.naturalHeight));assets.push({src,x:canvas.width/2,y:canvas.height/2,width:img.naturalWidth*scale,height:img.naturalHeight*scale,rotation:0});draw()};img.src=src}
-assetInput.onchange=()=>{if(assetInput.files?.[0]){const u=URL.createObjectURL(assetInput.files[0]);addAsset(u);assetInput.value=""}};document.querySelector("#stickerUpload")!.addEventListener("click",()=>assetInput.click());document.querySelector("#logo")!.addEventListener("click",()=>assetInput.click());
+assetInput.onchange=()=>{if(assetInput.files?.[0]){const u=URL.createObjectURL(assetInput.files[0]);addAsset(u);assetInput.value=""}};
+document.querySelector("#stickerUpload")!.addEventListener("click",()=>assetInput.click());document.querySelector("#logo")!.addEventListener("click",()=>assetInput.click());
 document.querySelectorAll<HTMLButtonElement>(".sticker").forEach(b=>b.onclick=()=>{const v=b.dataset.sticker!,svg=`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><text x="256" y="300" text-anchor="middle" font-size="330" font-family="Arial">${v}</text></svg>`;addAsset("data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg))});
 document.querySelector("#removeAsset")!.addEventListener("click",()=>{assets.pop();draw()});document.querySelector("#text")!.addEventListener("click",()=>{if(!source)return;const value=prompt("Teks yang ingin ditambahkan:");if(value)texts.push({text:value,x:canvas.width*.08,y:canvas.height*.15,size:Math.max(32,canvas.width*.06)});draw()});
 document.querySelector("#download")!.addEventListener("click",()=>{if(!source)return;const f=(document.querySelector("#format") as HTMLSelectElement).value,q=Number((document.querySelector("#quality") as HTMLInputElement).value)/100,a=document.createElement("a");a.download="media-alat-"+Date.now()+"."+(f==="jpeg"?"jpg":f);a.href=canvas.toDataURL("image/"+f,q);a.click()});

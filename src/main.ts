@@ -52,8 +52,8 @@ app.innerHTML=`
 <section class="workspace" id="workspace"><div class="empty" id="empty"><div class="drop-icon">＋</div><h2>Masukkan foto untuk mulai</h2><p>Seret foto ke sini atau pilih foto.</p><button id="choose">Pilih Foto</button></div><div class="canvas-wrap" id="canvasWrap" hidden><canvas id="canvas"></canvas></div></section>
 <aside class="rightbar"><section><h3>Elemen</h3><button class="action" id="text">Tambah Teks</button><button class="action" id="logo">Tambah Logo</button><button class="action" id="removeAsset">Hapus Elemen</button></section><section><h3>Ekspor</h3><label>Format<select id="format"><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option></select></label><label>Kualitas<input id="quality" type="range" min="50" max="100" value="92"></label></section><div class="hint">Pilih ukuran berdasarkan tujuan publikasi. Foto akan dipotong otomatis mengikuti ukuran tujuan tanpa diregangkan.</div></aside></main>
 <div class="modal-backdrop" id="sizeModal" hidden><div class="size-modal">
-<div class="modal-head"><div><strong>Ukuran untuk publikasi</strong><span>Pilih platform dan tujuan. Belum memilih pun boleh ditutup; kanvas tetap memakai ukuran foto asli.</span></div><div class="modal-head-actions"><button class="original-modal" id="originalModal">Ukuran asli</button><button class="close" id="closeSize">Tutup</button></div></div><input class="profile-search" id="profileSearch" type="search" placeholder="Cari platform, tujuan, atau ukuran...">
-<div class="platform-tabs" id="platformTabs"></div><div class="profile-grid" id="profileGrid"></div><div class="profile-empty" id="profileHint">Pilih platform di atas untuk melihat semua ukuran.</div>
+<div class="modal-head"><div><strong>Ukuran untuk publikasi</strong><span>Pilih platform dan tujuan. Belum memilih pun boleh ditutup; kanvas tetap memakai ukuran foto asli.</span></div><div class="modal-head-actions"><button type="button" class="original-modal" id="originalModal">Ukuran asli</button><button type="button" class="close" id="closeSize">Tutup</button></div></div><input class="profile-search" id="profileSearch" type="search" placeholder="Cari platform, tujuan, atau ukuran...">
+<div class="platform-tabs" id="platformTabs"></div><div class="profile-grid" id="profileGrid"></div>
 <div class="custom-fields" id="customFields"><input id="customW" type="number" min="1" placeholder="Lebar px"><input id="customH" type="number" min="1" placeholder="Tinggi px"><button id="applyCustom">Ukuran custom</button></div>
 </div></div>`;
 
@@ -114,27 +114,34 @@ function bindProfileCards(){
 }
 function renderProfiles(platform=platforms[0],query=""){
  const q=query.trim().toLowerCase();
- tabs.innerHTML=platforms.map(p=>`<button class="platform-tab ${p===platform?"active":""}" data-platform="${p}">${p}</button>`).join("");
- const list=profiles.filter(p=>p.platform===platform && (!q || `${p.platform} ${p.purpose} ${p.width}x${p.height} ${p.note}`.toLowerCase().includes(q)));
- grid.innerHTML=list.length?list.map(profileCard).join(""):`<div class="profile-empty">Tidak ditemukan di ${platform}. Hapus pencarian untuk melihat semua ukuran.</div>`;
+ tabs.innerHTML=`<button type="button" class="platform-tab all-tab ${platform==="__all__"?"active":""}" data-platform="__all__">Semua</button>`+
+  platforms.map(p=>`<button type="button" class="platform-tab ${p===platform?"active":""}" data-platform="${p}">${p}</button>`).join("");
+ const list=platform==="__all__"
+  ? profiles.filter(p=>!q || `${p.platform} ${p.purpose} ${p.width}x${p.height} ${p.note}`.toLowerCase().includes(q))
+  : profiles.filter(p=>p.platform===platform && (!q || `${p.platform} ${p.purpose} ${p.width}x${p.height} ${p.note}`.toLowerCase().includes(q)));
+ grid.innerHTML=list.length?list.map(profileCard).join(""):`<div class="profile-empty">Ukuran tidak ditemukan. Pilih platform lain atau hapus pencarian.</div>`;
  bindProfileCards();
- tabs.querySelectorAll<HTMLButtonElement>(".platform-tab").forEach(b=>b.onclick=()=>renderProfiles(b.dataset.platform!,q));
+ tabs.querySelectorAll<HTMLButtonElement>(".platform-tab").forEach(b=>b.onclick=()=>{
+  const next=b.dataset.platform||"__all__";
+  renderProfiles(next, "");
+  const input=document.querySelector<HTMLInputElement>("#profileSearch")!;
+  input.value="";
+ });
 }
 function renderAllMatches(query=""){
- const q=query.trim().toLowerCase();
- const list=profiles.filter(p=>!q || `${p.platform} ${p.purpose} ${p.width}x${p.height} ${p.note}`.toLowerCase().includes(q));
- grid.innerHTML=list.length?list.map(profileCard).join(""):`<div class="profile-empty">Ukuran tidak ditemukan. Coba nama platform atau ukuran lain.</div>`;
- bindProfileCards();
+ renderProfiles("__all__",query);
 }
 function openSize(){
- renderProfiles();
- modal.hidden=false;
  const input=document.querySelector<HTMLInputElement>("#profileSearch")!;
  input.value="";
- setTimeout(()=>input.focus(),0);
+ renderProfiles("__all__");
+ modal.hidden=false;
+ requestAnimationFrame(()=>input.focus());
 }
-function closeSize(){modal.hidden=true}
-document.querySelector("#openSize")!.addEventListener("click",openSize);document.querySelector("#originalSize")!.addEventListener("click",()=>{if(source){selectedProfile=null;customSize=null;showSize(source.naturalWidth,source.naturalHeight,"Ukuran asli");draw()}});document.querySelector("#originalModal")!.addEventListener("click",()=>{if(source){selectedProfile=null;customSize=null;showSize(source.naturalWidth,source.naturalHeight,"Ukuran asli");draw();closeSize()}});document.querySelector("#profileSearch")!.addEventListener("input",e=>{const q=(e.target as HTMLInputElement).value; if(q.trim()) renderAllMatches(q); else {const active=tabs.querySelector<HTMLButtonElement>(".platform-tab.active")?.dataset.platform||platforms[0];renderProfiles(active);}});document.querySelector("#cropTop")!.addEventListener("click",openSize);document.querySelector("#closeSize")!.addEventListener("click",closeSize);modal.addEventListener("click",e=>{if(e.target===modal)closeSize()});
+function closeSize(){
+ modal.hidden=true;
+}
+document.querySelector("#openSize")!.addEventListener("click",openSize);document.querySelector("#originalSize")!.addEventListener("click",()=>{if(source){selectedProfile=null;customSize=null;showSize(source.naturalWidth,source.naturalHeight,"Ukuran asli");draw()}});document.querySelector("#originalModal")!.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();if(source){selectedProfile=null;customSize=null;showSize(source.naturalWidth,source.naturalHeight,"Ukuran asli");draw();}closeSize()});document.querySelector("#profileSearch")!.addEventListener("input",e=>{const q=(e.target as HTMLInputElement).value;const active=tabs.querySelector<HTMLButtonElement>(".platform-tab.active")?.dataset.platform||"__all__";renderProfiles(active,q);});document.querySelector("#cropTop")!.addEventListener("click",openSize);document.querySelector("#closeSize")!.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();closeSize()});modal.addEventListener("click",e=>{if(e.target===modal)closeSize()});
 document.querySelector("#applyCustom")!.addEventListener("click",()=>{const w=Number((document.querySelector("#customW") as HTMLInputElement).value),h=Number((document.querySelector("#customH") as HTMLInputElement).value);if(w>0&&h>0){customSize={w,h};selectedProfile=null;showSize(w,h);draw();closeSize()}});
 
 document.querySelector("#left")!.addEventListener("click",()=>{rotation=(rotation+270)%360;draw()});document.querySelector("#right")!.addEventListener("click",()=>{rotation=(rotation+90)%360;draw()});document.querySelector("#flipX")!.addEventListener("click",()=>{flipX*=-1;draw()});document.querySelector("#flipY")!.addEventListener("click",()=>{flipY*=-1;draw()});

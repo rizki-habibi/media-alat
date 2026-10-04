@@ -133,7 +133,6 @@ app.innerHTML=`
 <div class="platform-tabs" id="platformTabs"></div><div class="profile-grid" id="profileGrid"></div>
 <div class="custom-fields" id="customFields"><input id="customW" type="number" min="1" placeholder="Lebar px"><input id="customH" type="number" min="1" placeholder="Tinggi px"><button id="applyCustom">Ukuran custom</button></div>
 </div></div>`;
-`;
 
 const canvas=document.querySelector<HTMLCanvasElement>("#canvas")!,ctx=canvas.getContext("2d")!;
 const photoInput=document.createElement("input"),assetInput=document.createElement("input");

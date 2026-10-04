@@ -171,7 +171,7 @@ setupLogin();
 
 const DRAFT_DB="media-alat-draft";
 let sourceDataUrl="";
-let draftTimer:number|undefined;
+let draftTimer=0;
 function draftDb():Promise<IDBDatabase>{return new Promise((resolve,reject)=>{const req=indexedDB.open(DRAFT_DB,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains("drafts"))req.result.createObjectStore("drafts");};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
 async function saveDraftLocal(){
  if(!source||!sourceDataUrl)return;

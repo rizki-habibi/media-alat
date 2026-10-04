@@ -150,6 +150,24 @@ const SUPABASE_URL="https://rjoncaudkgsszhzgmwcx.supabase.co";
 const SUPABASE_KEY="sb_publishable_zu_I8iFv6LxoWcRjFzoWFA_t_tutDqJ";
 const ownerKey=localStorage.getItem("media-alat-owner")||crypto.randomUUID();
 localStorage.setItem("media-alat-owner",ownerKey);
+const AUTH_KEY="media-alat-auth";
+const PASSWORD_HASH="15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225";
+function setupLogin(){
+ const screen=document.querySelector<HTMLElement>("#loginScreen")!;
+ const form=document.querySelector<HTMLFormElement>("#loginForm")!;
+ const input=document.querySelector<HTMLInputElement>("#loginPassword")!;
+ const error=document.querySelector<HTMLElement>("#loginError")!;
+ screen.hidden=localStorage.getItem(AUTH_KEY)==="1";
+ form.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const bytes=new TextEncoder().encode(input.value);
+  const digest=await crypto.subtle.digest("SHA-256",bytes);
+  const hash=Array.from(new Uint8Array(digest)).map(x=>x.toString(16).padStart(2,"0")).join("");
+  if(hash===PASSWORD_HASH){localStorage.setItem(AUTH_KEY,"1");screen.hidden=true;error.textContent="";void restoreDraft()}
+  else{error.textContent="Password salah. Coba lagi.";input.select()}
+ });
+}
+setupLogin();
 
 function showSize(w:number,h:number,label="Ukuran custom"){document.querySelector("#sizeReadout")!.textContent=label+" • "+w+" × "+h+" px"}
 function cropDimensions():{w:number;h:number}{

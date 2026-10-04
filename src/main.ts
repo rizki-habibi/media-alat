@@ -169,6 +169,37 @@ function setupLogin(){
 }
 setupLogin();
 
+const DRAFT_DB="media-alat-draft";
+let sourceDataUrl="";
+let draftTimer:number|undefined;
+function draftDb():Promise<IDBDatabase>{return new Promise((resolve,reject)=>{const req=indexedDB.open(DRAFT_DB,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains("drafts"))req.result.createObjectStore("drafts");};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+async function saveDraftLocal(){
+ if(!source||!sourceDataUrl)return;
+ try{
+  const db=await draftDb();
+  const data={sourceDataUrl,rotation,flipX,flipY,panX,panY,filter,selectedProfileId:selectedProfile?.id||null,customSize,assets,texts,format:(document.querySelector("#format") as HTMLSelectElement)?.value||"png",quality:Number((document.querySelector("#quality") as HTMLInputElement)?.value||92)};
+  await new Promise<void>((resolve,reject)=>{const tx=db.transaction("drafts","readwrite");tx.objectStore("drafts").put(data,"current");tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)});
+  db.close();
+ }catch(e){console.warn("Draft lokal gagal disimpan",e)}
+}
+function scheduleDraft(){window.clearTimeout(draftTimer);draftTimer=window.setTimeout(()=>void saveDraftLocal(),450)}
+async function getDraft():Promise<any|null>{
+ try{const db=await draftDb();const value=await new Promise<any>((resolve,reject)=>{const tx=db.transaction("drafts","readonly");const req=tx.objectStore("drafts").get("current");req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)});db.close();return value}catch(e){console.warn("Draft lokal gagal dibaca",e);return null}
+}
+async function restoreDraft(){
+ const draft=await getDraft();if(!draft?.sourceDataUrl)return;
+ const img=new Image();
+ img.onload=()=>{
+  source=img;sourceDataUrl=draft.sourceDataUrl;rotation=Number(draft.rotation||0);flipX=Number(draft.flipX||1);flipY=Number(draft.flipY||1);panX=Number(draft.panX||0);panY=Number(draft.panY||0);
+  filter={brightness:Number(draft.filter?.brightness??100),contrast:Number(draft.filter?.contrast??100),saturation:Number(draft.filter?.saturation??100),gray:Number(draft.filter?.gray??0)};
+  selectedProfile=profiles.find(p=>p.id===draft.selectedProfileId)||null;customSize=draft.customSize||null;assets=Array.isArray(draft.assets)?draft.assets:[];texts=Array.isArray(draft.texts)?draft.texts:[];
+  const f=document.querySelector<HTMLSelectElement>("#format"),q=document.querySelector<HTMLInputElement>("#quality");if(f&&draft.format)f.value=draft.format;if(q&&draft.quality)q.value=String(draft.quality);
+  document.querySelector("#empty")?.setAttribute("hidden","true");document.querySelector("#canvasWrap")?.removeAttribute("hidden");document.querySelector<HTMLButtonElement>("#download")!.disabled=false;document.querySelector<HTMLButtonElement>("#save")!.disabled=false;
+  const out=cropDimensions();showSize(out.w,out.h,selectedProfile?.purpose||(customSize?"Ukuran custom":"Ukuran asli"));draw();
+ };
+ img.src=draft.sourceDataUrl;
+}
+
 function showSize(w:number,h:number,label="Ukuran custom"){document.querySelector("#sizeReadout")!.textContent=label+" • "+w+" × "+h+" px"}
 function cropDimensions():{w:number;h:number}{
  if(!source)return{w:1,h:1};

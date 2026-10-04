@@ -65,7 +65,11 @@ let filter:FilterState={brightness:100,contrast:100,saturation:100,gray:0};
 let selectedProfile:Profile|null=null,customSize:{w:number;h:number}|null=null;
 let assets:{src:string;x:number;y:number;width:number;height:number;rotation:number}[]=[];
 let texts:{text:string;x:number;y:number;size:number}[]=[];
-const platforms=[...new Set(profiles.map(p=>p.platform))];\nconst SUPABASE_URL="https://rjoncaudkgsszhzgmwcx.supabase.co";\nconst SUPABASE_KEY="sb_publishable_zu_I8iFv6LxoWcRjFzoWFA_t_tutDqJ";\nconst ownerKey=localStorage.getItem("media-alat-owner")||crypto.randomUUID();\nlocalStorage.setItem("media-alat-owner",ownerKey);
+const platforms=[...new Set(profiles.map(p=>p.platform))];
+const SUPABASE_URL="https://rjoncaudkgsszhzgmwcx.supabase.co";
+const SUPABASE_KEY="sb_publishable_zu_I8iFv6LxoWcRjFzoWFA_t_tutDqJ";
+const ownerKey=localStorage.getItem("media-alat-owner")||crypto.randomUUID();
+localStorage.setItem("media-alat-owner",ownerKey);
 
 function showSize(w:number,h:number,label="Ukuran custom"){document.querySelector("#sizeReadout")!.textContent=label+" • "+w+" × "+h+" px"}
 function cropDimensions():{w:number;h:number}{
@@ -74,7 +78,17 @@ function cropDimensions():{w:number;h:number}{
  if(selectedProfile)return{w:selectedProfile.width,h:selectedProfile.height};
  return{w:source.naturalWidth,h:source.naturalHeight};
 }
-async function saveProject(){\n if(!source)return;\n const name=prompt("Nama proyek:",selectedProfile?.purpose||"Proyek Media Alat");\n if(!name)return;\n const out=cropDimensions();\n const payload={name,width:out.w,height:out.h,platform:selectedProfile?.platform||null,purpose:selectedProfile?.purpose||null,profile_id:selectedProfile?.id||null,owner_key:ownerKey,state:{rotation,flipX,flipY,filter}};\n const response=await fetch(SUPABASE_URL+"/rest/v1/media_projects",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json","Prefer":"return=minimal","x-media-owner":ownerKey},body:JSON.stringify(payload)});\n if(!response.ok){alert("Gagal menyimpan proyek ke Supabase.");return;}\n alert("Proyek tersimpan di Supabase.");\n}\nfunction draw(){
+async function saveProject(){
+ if(!source)return;
+ const name=prompt("Nama proyek:",selectedProfile?.purpose||"Proyek Media Alat");
+ if(!name)return;
+ const out=cropDimensions();
+ const payload={name,width:out.w,height:out.h,platform:selectedProfile?.platform||null,purpose:selectedProfile?.purpose||null,profile_id:selectedProfile?.id||null,owner_key:ownerKey,state:{rotation,flipX,flipY,filter}};
+ const response=await fetch(SUPABASE_URL+"/rest/v1/media_projects",{method:"POST",headers:{"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json","Prefer":"return=minimal","x-media-owner":ownerKey},body:JSON.stringify(payload)});
+ if(!response.ok){alert("Gagal menyimpan proyek ke Supabase.");return;}
+ alert("Proyek tersimpan di Supabase.");
+}
+function draw(){
  if(!source)return;
  const out=cropDimensions(),cw=out.w,ch=out.h;canvas.width=cw;canvas.height=ch;ctx.clearRect(0,0,cw,ch);
  const rad=rotation*Math.PI/180,sw=Math.abs(rotation)%180===90,iw=source.naturalWidth,ih=source.naturalHeight;
@@ -109,5 +123,6 @@ assetInput.onchange=()=>{if(assetInput.files?.[0]){const u=URL.createObjectURL(a
 document.querySelector("#stickerUpload")!.addEventListener("click",()=>assetInput.click());document.querySelector("#logo")!.addEventListener("click",()=>assetInput.click());
 document.querySelectorAll<HTMLButtonElement>(".sticker").forEach(b=>b.onclick=()=>{const v=b.dataset.sticker!,svg=`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><text x="256" y="300" text-anchor="middle" font-size="330" font-family="Arial">${v}</text></svg>`;addAsset("data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg))});
 document.querySelector("#removeAsset")!.addEventListener("click",()=>{assets.pop();draw()});document.querySelector("#text")!.addEventListener("click",()=>{if(!source)return;const value=prompt("Teks yang ingin ditambahkan:");if(value)texts.push({text:value,x:canvas.width*.08,y:canvas.height*.15,size:Math.max(32,canvas.width*.06)});draw()});
-document.querySelector("#save")!.addEventListener("click",()=>void saveProject());\ndocument.querySelector("#download")!.addEventListener("click",()=>{if(!source)return;const f=(document.querySelector("#format") as HTMLSelectElement).value,q=Number((document.querySelector("#quality") as HTMLInputElement).value)/100,a=document.createElement("a");a.download="media-alat-"+Date.now()+"."+(f==="jpeg"?"jpg":f);a.href=canvas.toDataURL("image/"+f,q);a.click()});
+document.querySelector("#save")!.addEventListener("click",()=>void saveProject());
+document.querySelector("#download")!.addEventListener("click",()=>{if(!source)return;const f=(document.querySelector("#format") as HTMLSelectElement).value,q=Number((document.querySelector("#quality") as HTMLInputElement).value)/100,a=document.createElement("a");a.download="media-alat-"+Date.now()+"."+(f==="jpeg"?"jpg":f);a.href=canvas.toDataURL("image/"+f,q);a.click()});
 const workspace=document.querySelector("#workspace")!;workspace.addEventListener("dragover",e=>e.preventDefault());workspace.addEventListener("drop",e=>{e.preventDefault();const f=(e as DragEvent).dataTransfer?.files[0];if(f)load(f)});
